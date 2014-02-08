@@ -94,6 +94,7 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
 void circle(float centerX, float centerY, float radius) {
   // Draw inner circle
   glBegin(GL_POINTS);
+    int x;
 
   // We could eliminate wasted work by only looping over the pixels
   // inside the sphere's radius.  But the example is more clear this

@@ -37,7 +37,10 @@ class Viewport;
 
 class Viewport {
   public:
-    int w, h; // width and height
+    int w, h, f; // width and height
+    // f is the cmd line option differentiating ambient, specular, diffuse
+    float r, b, g;
+    //rgb are values also passed in from cmd line
 };
 
 
@@ -96,49 +99,60 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
 void circle(float centerX, float centerY, float radius) {
   // Draw inner circle
   glBegin(GL_POINTS);
-    int x;
-
   // We could eliminate wasted work by only looping over the pixels
   // inside the sphere's radius.  But the example is more clear this
   // way.  In general drawing an object by loopig over the whole
   // screen is wasteful.
 
-  int i,j;  // Pixel indices
+   int i,j;  // Pixel indices
+    float r,g,b;
+    int ka;
+    int minI = max(0,(int)floor(centerX-radius));
+    int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
+    
+    int minJ = max(0,(int)floor(centerY-radius));
+    int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+    r=viewport.r;
+    g=viewport.g;
+    b=viewport.b;
+    ka=.2;
+    
+    
+    for (i=0;i<viewport.w;i++) {
+        for (j=0;j<viewport.h;j++) {
+            
+            // Location of the center of pixel relative to center of sphere
+            float x = (i+0.5-centerX);
+            float y = (j+0.5-centerY);
+            
+            float dist = sqrt(sqr(x) + sqr(y));
+            
+            if (dist<=radius) {
+                
+                // This is the front-facing Z coordinate
+                float z = sqrt(radius*radius-dist*dist);
+                
+                if (viewport.f==1)
+                {
+                  r=ka*r;
+                  g=ka*g;
+                  b=ka*b;
+                }
 
-  int minI = max(0,(int)floor(centerX-radius));
-  int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
 
-  int minJ = max(0,(int)floor(centerY-radius));
-  int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+                setPixel(i,j, r, g, b);
+                
 
-
-
-  for (i=0;i<viewport.w;i++) {
-    for (j=0;j<viewport.h;j++) {
-
-      // Location of the center of pixel relative to center of sphere
-      float x = (i+0.5-centerX);
-      float y = (j+0.5-centerY);
-
-      float dist = sqrt(sqr(x) + sqr(y));
-
-      if (dist<=radius) {
-
-        // This is the front-facing Z coordinate
-        float z = sqrt(radius*radius-dist*dist);
-
-        setPixel(i,j, 1.0, 0.0, 0.0);
-
-        // This is amusing, but it assumes negative color values are treated reasonably.
-        // setPixel(i,j, x/radius, y/radius, z/radius );
-      }
-
-
+                // This is amusing, but it assumes negative color values are treated reasonably.
+                // setPixel(i,j, x/radius, y/radius, z/radius );
+            }
+            
+            
+        }
     }
-  }
-
-
-  glEnd();
+    
+    
+    glEnd();
 }
 
 float* diffuse(float* pixelColor, vec3 l, vec3 n) {
@@ -170,13 +184,16 @@ void sphere(float centerX, float centerY, float centerZ, float radius) {
     // screen is wasteful.
     
     int i,j;  // Pixel indices
-    
+    int r,g,b,ka;
     int minI = max(0,(int)floor(centerX-radius));
     int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
     
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-    
+    r=viewport.r;
+    g=viewport.g;
+    b=viewport.b;
+    ka=1;
     
     
     for (i=0;i<viewport.w;i++) {
@@ -193,8 +210,16 @@ void sphere(float centerX, float centerY, float centerZ, float radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
                 
-                setPixel(i,j, 1.0, 0.0, 0.0);
+                if (viewport.f==1)
+                {
+                  r=ka*r;
+                  g=ka*g;
+                  b=ka*b;
+                }
+
+                setPixel(i,j, r, g, b);
                 
+
                 // This is amusing, but it assumes negative color values are treated reasonably.
                 // setPixel(i,j, x/radius, y/radius, z/radius );
             }
@@ -229,12 +254,77 @@ void myDisplay() {
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
+
+
+
 int main(int argc, char *argv[]) {
   //This initializes glut
   glutInit(&argc, argv);
-
+  
   //This tells glut to use a double-buffered window with red, green, and blue channels 
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+/*
+int i;
+  for (i=1; i<= 3; i++) {
+    printf("\narg%d=%s", i, argv[i]);
+ }*/
+
+
+
+
+
+  const char *fxn=argv[1];
+  viewport.f;
+  viewport.r=atoi(argv[2]);
+  viewport.g=atoi(argv[3]);
+  viewport.b=atoi(argv[4]);
+
+  
+
+//ambience
+  if (strcmp(fxn, "-ka") == 0) {
+    viewport.f=1;
+       printf ("Characters: %c %c \n", *fxn, 65);
+}
+   if (strcmp(fxn, "-ks") == 0) {
+    viewport.f=2;
+       printf ("Characters: %c %c \n", *fxn, 65);
+}
+//diffusion
+if (strcmp(fxn, "-kd") == 0) {
+    viewport.f=3;
+       printf ("Characters: %c %c \n", *fxn, 65);
+
+}
+ 
+ 
+
+
+
+  /*
+
+    if (fxn.compare("-kd")==1) {
+    viewport.f=2;
+
+           printf ("Decimals: %d %ld\n", viewport.f, 650000L);
+
+  }
+    if (fxn.compare("-ks")==1) {
+        viewport.f=3;
+
+
+   }
+  else{ 
+      std::cerr << "--NOT reading :[." << std::endl;
+
+}*/
+
+
+ 
+
+
+  
+
 
   // Initalize theviewport size
   viewport.w = 400;

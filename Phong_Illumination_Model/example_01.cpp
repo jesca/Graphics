@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
     viewport.f=2;
   }
   if (fxn!="-ka" or fxn!="-kd" or fxn!="-ks")
-    {  std::cerr << "--choose phong option -ka, -kd, or -ks." << std::endl;
+    {  std::cerr << "--choose option: -ka, -kd, or -ks." << std::endl;
 }
 
  

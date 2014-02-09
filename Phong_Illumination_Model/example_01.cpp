@@ -155,23 +155,28 @@ void circle(float centerX, float centerY, float radius) {
     glEnd();
 }
 
-float* diffuse(float* pixelColor, vec3 l, vec3 n) {
-    l = normalize(l);
-    n = normalize(n);
-    float lDotn = dot(l, n);
-    for(int i = 0; i < 2; i++) {
-        pixelColor[i] *= lDotn;
-    }
-}
+//float* diffuse(float* pixelColor, vec3 l, vec3 n) {
+//    l = normalize(l);
+//    n = normalize(n);
+//    float lDotn = dot(l, n);
+//    for(int i = 0; i < 2; i++) {
+//        pixelColor[i] *= lDotn;
+//    }
+//}
+//
+//float* specular(float* pixelColor, vec3 r, vec3 v, float p) {
+//    r = normalize(r);
+//    v = normalize(v);
+//    float rDotv = dot(r, v);
+//    float rDotvP = pow(rDotv, p);
+//    for(int i = 0; i < 2; i++) {
+//        pixelColor[i] *= rDotvP;
+//    }
+//}
 
-float* specular(float* pixelColor, vec3 r, vec3 v, float p) {
-    r = normalize(r);
-    v = normalize(v);
-    float rDotv = dot(r, v);
-    float rDotvP = pow(rDotv, p);
-    for(int i = 0; i < 2; i++) {
-        pixelColor[i] *= rDotvP;
-    }
+float dot(int length1, float *vec1[], int length2, float *vec2[]) {
+    
+    
 }
 
 void sphere(float centerX, float centerY, float centerZ, float radius) {
@@ -282,16 +287,16 @@ int i;
   
 
 //ambience
-  if (strcmp(fxn, "-ka") == 0) {
+  if (strcmp(fxn, "-ka\n") == 0) {
     viewport.f=1;
        printf ("Characters: %c %c \n", *fxn, 65);
 }
-   if (strcmp(fxn, "-ks") == 0) {
+   if (strcmp(fxn, "-ks\n") == 0) {
     viewport.f=2;
        printf ("Characters: %c %c \n", *fxn, 65);
 }
 //diffusion
-if (strcmp(fxn, "-kd") == 0) {
+if (strcmp(fxn, "-kd\n") == 0) {
     viewport.f=3;
        printf ("Characters: %c %c \n", *fxn, 65);
 

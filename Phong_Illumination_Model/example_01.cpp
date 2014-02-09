@@ -35,7 +35,7 @@ class Viewport;
 
 class Viewport {
   public:
-    int w, h; // width and height
+    int w, h, f; // width and height, f is fxn
 };
 
 
@@ -109,7 +109,10 @@ void circle(float centerX, float centerY, float radius) {
   int minJ = max(0,(int)floor(centerY-radius));
   int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
 
+    int rgb[]={0,0,1};
+    int ka=.2;
 
+ 
 
   for (i=0;i<viewport.w;i++) {
     for (j=0;j<viewport.h;j++) {
@@ -125,7 +128,7 @@ void circle(float centerX, float centerY, float radius) {
         // This is the front-facing Z coordinate
         float z = sqrt(radius*radius-dist*dist);
 
-        setPixel(i,j, 1.0, 0.0, 0.0);
+        setPixel(i,j, rgb[0]*.2, rgb[1]*.2, rgb[2]*.2);
 
         // This is amusing, but it assumes negative color values are treated reasonably.
         // setPixel(i,j, x/radius, y/radius, z/radius );
@@ -161,12 +164,37 @@ void myDisplay() {
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
+
+
+
 int main(int argc, char *argv[]) {
   //This initializes glut
   glutInit(&argc, argv);
 
+    
   //This tells glut to use a double-buffered window with red, green, and blue channels 
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  string fxn=argv[1];
+  viewport.f;
+
+  if (fxn=="-ka") {
+    viewport.f=0;
+  }
+  else if (fxn=="-kd") {
+    viewport.f=1;
+  }
+  else if (fxn=="-ks") {
+    viewport.f=2;
+  }
+  if (fxn!="-ka" or fxn!="-kd" or fxn!="-ks")
+    {  std::cerr << "--choose phong option -ka, -kd, or -ks." << std::endl;
+}
+
+ 
+
+
+  
+
 
   // Initalize theviewport size
   viewport.w = 400;

@@ -155,6 +155,29 @@ void circle(float centerX, float centerY, float radius) {
     glEnd();
 }
 
+float dot(int length, float vec1[], float vec2[]) {
+    float sum = 0;
+    for (int i = 0; i<length; i++) {
+        sum += vec1[i]*vec2[i];
+    }
+    return sum;
+}
+
+float norm(int length, float vec[]) {
+    float sum = 0;
+    for (int i = 0; i<length; i++) {
+        sum += vec[i]*vec[i];
+    }
+    return sqrt(sum);
+}
+
+float normalize(int length, float vec[]) {
+    float vecnorm = norm(length, vec);
+    for (int i = 0; i<length; i++) {
+        vec[i] = vec[i]/vecnorm;
+    }
+}
+
 //float* diffuse(float* pixelColor, vec3 l, vec3 n) {
 //    l = normalize(l);
 //    n = normalize(n);
@@ -174,10 +197,6 @@ void circle(float centerX, float centerY, float radius) {
 //    }
 //}
 
-float dot(int length1, float *vec1[], int length2, float *vec2[]) {
-    
-    
-}
 
 void sphere(float centerX, float centerY, float centerZ, float radius) {
     // Draw inner circle
@@ -263,6 +282,9 @@ void myDisplay() {
 
 
 int main(int argc, char *argv[]) {
+    
+    
+    
   //This initializes glut
   glutInit(&argc, argv);
   
@@ -276,7 +298,7 @@ int i;
 
 
 
-
+    
 
   const char *fxn=argv[1];
   viewport.f;
@@ -301,7 +323,21 @@ if (strcmp(fxn, "-kd\n") == 0) {
        printf ("Characters: %c %c \n", *fxn, 65);
 
 }
- 
+
+
+    // testing functions here
+    float test1[] = {3, 4, 2};
+    float test2[] = {1, 2, 3};
+    float dotp = dot(3, test1, test2);
+    printf("should be 17.0: %f\n", dotp);
+    
+    float normtest = norm(3, test1);
+    printf("should be 5.3851...: %f\n", normtest);
+    
+    normalize(3, test1);
+    for(int i = 0; i < 3; i++) {
+        printf("%f, \n", test1[i]);
+    }
  
 
 

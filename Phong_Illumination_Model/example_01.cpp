@@ -154,7 +154,7 @@ void circle(float centerX, float centerY, float radius) {
     
     glEnd();
 }
-
+// Dot Product
 float dot(int length, float vec1[], float vec2[]) {
     float sum = 0;
     for (int i = 0; i<length; i++) {
@@ -163,6 +163,7 @@ float dot(int length, float vec1[], float vec2[]) {
     return sum;
 }
 
+// Norm (Vector length)
 float norm(int length, float vec[]) {
     float sum = 0;
     for (int i = 0; i<length; i++) {
@@ -171,6 +172,7 @@ float norm(int length, float vec[]) {
     return sqrt(sum);
 }
 
+// Normalize
 float normalize(int length, float vec[]) {
     float vecnorm = norm(length, vec);
     for (int i = 0; i<length; i++) {
@@ -178,24 +180,26 @@ float normalize(int length, float vec[]) {
     }
 }
 
-//float* diffuse(float* pixelColor, vec3 l, vec3 n) {
-//    l = normalize(l);
-//    n = normalize(n);
-//    float lDotn = dot(l, n);
-//    for(int i = 0; i < 2; i++) {
-//        pixelColor[i] *= lDotn;
-//    }
-//}
-//
-//float* specular(float* pixelColor, vec3 r, vec3 v, float p) {
-//    r = normalize(r);
-//    v = normalize(v);
-//    float rDotv = dot(r, v);
-//    float rDotvP = pow(rDotv, p);
-//    for(int i = 0; i < 2; i++) {
-//        pixelColor[i] *= rDotvP;
-//    }
-//}
+// Diffuse
+void diffuse(float pixelColor[], float l[], float n[]) {
+    normalize(3, l);
+    normalize(3, n);
+    float lDotn = dot(3, l, n);
+    for(int i = 0; i < 3; i++) {
+        pixelColor[i] *= lDotn;
+    }
+}
+
+// Specular
+void specular(float pixelColor[], float r[], float v[], float p) {
+    normalize(3, r);
+    normalize(3, v);
+    float rDotv = dot(3, r, v);
+    float rDotvP = pow(rDotv, p);
+    for(int i = 0; i < 3; i++) {
+        pixelColor[i] *= rDotvP;
+    }
+}
 
 
 void sphere(float centerX, float centerY, float centerZ, float radius) {

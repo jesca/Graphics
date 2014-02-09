@@ -280,9 +280,9 @@ int i;
 
   const char *fxn=argv[1];
   viewport.f;
-  viewport.r=atoi(argv[2]);
-  viewport.g=atoi(argv[3]);
-  viewport.b=atoi(argv[4]);
+  viewport.r=atof(argv[2]);
+  viewport.g=atof(argv[3]);
+  viewport.b=atof(argv[4]);
 
   
 

@@ -22,9 +22,7 @@
 #include <math.h>
 
 
-
 #define PI 3.14159265  // Should be used from mathlib
-
 inline float sqr(float x) { return x*x; }
 
 using namespace std;
@@ -153,8 +151,8 @@ float* diffuse(float* pixelColor, vec3 l, vec3 n) {
 float* specular(float* pixelColor, vec3 r, vec3 v, float p) {
     r = normalize(r);
     v = normalize(v);
-    float rDotv = dot(r, v);
-    float rDotvP = pow(rDotv, p);
+    float rDotv = dot(l, n);
+    float rDotvP = power(rDotv, p);
     for(int i = 0; i < 2; i++) {
         pixelColor[i] *= rDotvP;
     }

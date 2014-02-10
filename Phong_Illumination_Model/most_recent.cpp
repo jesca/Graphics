@@ -190,7 +190,7 @@ float norm(int length, float vec[]) {
 }
 
 // Normalize
-float normalize(int length, float vec[]) {
+void normalize(int length, float vec[]) {
     float vecnorm = norm(length, vec);
     for (int i = 0; i<length; i++) {
         vec[i] = vec[i]/vecnorm;

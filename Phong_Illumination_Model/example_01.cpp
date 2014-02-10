@@ -112,6 +112,7 @@ void circle(float centerX, float centerY, float radius) {
     
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+    float v[] = {0, 0, 1}; // viewer vector
     r=viewport.r;
     g=viewport.g;
     b=viewport.b;
@@ -208,63 +209,6 @@ void specular(float pixelColor[], float r[], float v[], float p) {
 }
 
 
-void sphere(float centerX, float centerY, float centerZ, float radius) {
-    // Draw inner circle
-    glBegin(GL_POINTS);
-    
-    // We could eliminate wasted work by only looping over the pixels
-    // inside the sphere's radius.  But the example is more clear this
-    // way.  In general drawing an object by loopig over the whole
-    // screen is wasteful.
-    
-    int i,j;  // Pixel indices
-    int r,g,b,ka;
-    int minI = max(0,(int)floor(centerX-radius));
-    int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
-    
-    int minJ = max(0,(int)floor(centerY-radius));
-    int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-    r=viewport.r;
-    g=viewport.g;
-    b=viewport.b;
-    ka=1;
-    
-    
-    for (i=0;i<viewport.w;i++) {
-        for (j=0;j<viewport.h;j++) {
-            
-            // Location of the center of pixel relative to center of sphere
-            float x = (i+0.5-centerX);
-            float y = (j+0.5-centerY);
-            
-            float dist = sqrt(sqr(x) + sqr(y));
-            
-            if (dist<=radius) {
-                
-                // This is the front-facing Z coordinate
-                float z = sqrt(radius*radius-dist*dist);
-                
-                if (viewport.f==1)
-                {
-                  r=ka*r;
-                  g=ka*g;
-                  b=ka*b;
-                }
-
-                setPixel(i,j, r, g, b);
-                
-
-                // This is amusing, but it assumes negative color values are treated reasonably.
-                // setPixel(i,j, x/radius, y/radius, z/radius );
-            }
-            
-            
-        }
-    }
-    
-    
-    glEnd();
-}
 //****************************************************
 // function that does the actual drawing of stuff
 //***************************************************

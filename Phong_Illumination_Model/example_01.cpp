@@ -179,6 +179,12 @@ float normalize(int length, float vec[]) {
         vec[i] = vec[i]/vecnorm;
     }
 }
+// Cross Product
+void cross(float a[], float b[], float crossProd[]) {
+    crossProd[0] = a[1]*b[2] - a[2]*b[1];
+    crossProd[1] = a[2]*b[0] - a[0]*b[2];
+    crossProd[2] = a[0]*b[1] - a[1]*b[0];
+}
 
 // Diffuse
 void diffuse(float pixelColor[], float l[], float n[]) {
@@ -329,22 +335,33 @@ if (strcmp(fxn, "-kd\n") == 0) {
 }
 
 
-    // testing functions here
+    //****************************************************
+    // begin Tests
+    //****************************************************
     float test1[] = {3, 4, 2};
     float test2[] = {1, 2, 3};
     float dotp = dot(3, test1, test2);
     printf("should be 17.0: %f\n", dotp);
     
     float normtest = norm(3, test1);
-    printf("should be 5.3851...: %f\n", normtest);
+    printf("should be 5.385165: %f\n", normtest);
+    
+    float crosstest[3];
+    cross(test1, test2, crosstest);
+    printf("should be 8, -7, 2: \n");
+    for(int i = 0; i < 3; i++) {
+        printf("%f \n", crosstest[i]);
+    }
     
     normalize(3, test1);
+    printf("should be 0.557086, 0.742781, 0.371391: \n");
     for(int i = 0; i < 3; i++) {
-        printf("%f, \n", test1[i]);
+        printf("%f \n", test1[i]);
     }
  
-
-
+    //****************************************************
+    // end Tests
+    //****************************************************
 
   /*
 

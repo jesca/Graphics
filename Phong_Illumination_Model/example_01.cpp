@@ -121,6 +121,11 @@ void circle(float centerX, float centerY, float radius) {
     
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+<<<<<<< HEAD
+=======
+
+    
+>>>>>>> 2661c52e7d3a278432593b808656278a0fc16088
     ka=.2;
     
  
@@ -149,6 +154,15 @@ void circle(float centerX, float centerY, float radius) {
                 float ynorm = y/veclen;
                 float znorm = z/veclen;
                 
+<<<<<<< HEAD
+=======
+                if (viewport.func==1)
+                {
+                  r=ka*r;
+                  g=ka*g;
+                  b=ka*b;
+                }
+>>>>>>> 2661c52e7d3a278432593b808656278a0fc16088
 
 
                 setPixel(i,j, r, g, b);
@@ -220,8 +234,59 @@ void specular(float pixelColor[], float r[], float v[], float p) {
 }
 
 
+<<<<<<< HEAD
  
 
+=======
+void sphere(float centerX, float centerY, float centerZ, float radius) {
+    // Draw inner circle
+    glBegin(GL_POINTS);
+    
+    // We could eliminate wasted work by only looping over the pixels
+    // inside the sphere's radius.  But the example is more clear this
+    // way.  In general drawing an object by loopig over the whole
+    // screen is wasteful.
+    
+    int i,j;  // Pixel indices
+    int r,g,b;
+    int ka,ks,kd; //ambient, diffuse, specular coefficients
+    int minI = max(0,(int)floor(centerX-radius));
+    int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
+    
+    int minJ = max(0,(int)floor(centerY-radius));
+    int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+    r=viewport.r;
+    g=viewport.g;
+    b=viewport.b;
+    ka=1;
+    
+    
+    for (i=0;i<viewport.w;i++) {
+        for (j=0;j<viewport.h;j++) {
+            
+            // Location of the center of pixel relative to center of sphere
+            float x = (i+0.5-centerX);
+            float y = (j+0.5-centerY);
+            
+            float dist = sqrt(sqr(x) + sqr(y));
+            
+            if (dist<=radius) {
+                
+                // This is the front-facing Z coordinate
+                float z = sqrt(radius*radius-dist*dist);
+                
+                //ambient
+                if (viewport.f==1)
+                {
+                  r=ka*r;
+                  g=ka*g;
+                  b=ka*b;
+                }
+                //diffuse
+                if (viewport.f==2) {
+
+                }
+>>>>>>> 2661c52e7d3a278432593b808656278a0fc16088
 
 
 //****************************************************

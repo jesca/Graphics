@@ -184,7 +184,7 @@ float normalize(int length, float vec[]) {
 void diffuse(float pixelColor[], float l[], float n[]) {
     normalize(3, l);
     normalize(3, n);
-    float lDotn = dot(3, l, n);
+    float lDotn = fmax(dot(3, l, n), 0);
     for(int i = 0; i < 3; i++) {
         pixelColor[i] *= lDotn;
     }
@@ -194,7 +194,7 @@ void diffuse(float pixelColor[], float l[], float n[]) {
 void specular(float pixelColor[], float r[], float v[], float p) {
     normalize(3, r);
     normalize(3, v);
-    float rDotv = dot(3, r, v);
+    float rDotv = fmax(dot(3, r, v), 0);
     float rDotvP = pow(rDotv, p);
     for(int i = 0; i < 3; i++) {
         pixelColor[i] *= rDotvP;

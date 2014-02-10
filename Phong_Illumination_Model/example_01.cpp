@@ -1,4 +1,3 @@
-
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -342,8 +341,8 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
     }
   
         
-//• -dl x y z r g b
-    if (strcmp(fxn, "-pl\n") == 0) {
+//• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
+    if (strcmp(fxn, "-dl\n") == 0) {
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
           for (int adddl=0; adddl<6; adddl++){

@@ -39,9 +39,7 @@ class Viewport {
   public:
     int w, h, func; // width and height
     // f is the cmd line option differentiating ambient, specular, diffuse
-    float ra,ga,ba, rs,gs,bs,rd,gd,rd;
-    //rgb are values also passed in from cmd line
-    bool amb,diff;
+    float ra,ga,ba, rs,gs,bs,rd,gd;
    // bool plcount[]={false,false,false,false,false}; //5 point lights total
     int plcount, dlcount;
     float pl_array[5][6];
@@ -121,11 +119,6 @@ void circle(float centerX, float centerY, float radius) {
     
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-<<<<<<< HEAD
-=======
-
-    
->>>>>>> 2661c52e7d3a278432593b808656278a0fc16088
     ka=.2;
     
  
@@ -149,23 +142,13 @@ void circle(float centerX, float centerY, float radius) {
     */
         //getting the unit normal vectors for centerx, centery, 
 
-                float veclen = getLen(x,y,z);
-                float xnorm = x/veclen;
-                float ynorm = y/veclen;
-                float znorm = z/veclen;
+                ///float xnorm = x/veclen;
+                //float ynorm = y/veclen;
+                //float znorm = z/veclen;
                 
-<<<<<<< HEAD
-=======
-                if (viewport.func==1)
-                {
-                  r=ka*r;
-                  g=ka*g;
-                  b=ka*b;
-                }
->>>>>>> 2661c52e7d3a278432593b808656278a0fc16088
 
 
-                setPixel(i,j, r, g, b);
+                setPixel(i,j, viewport.ra, viewport.ga, viewport.ba);
                 
 
                 // This is amusing, but it assumes negative color values are treated reasonably.
@@ -234,59 +217,8 @@ void specular(float pixelColor[], float r[], float v[], float p) {
 }
 
 
-<<<<<<< HEAD
  
 
-=======
-void sphere(float centerX, float centerY, float centerZ, float radius) {
-    // Draw inner circle
-    glBegin(GL_POINTS);
-    
-    // We could eliminate wasted work by only looping over the pixels
-    // inside the sphere's radius.  But the example is more clear this
-    // way.  In general drawing an object by loopig over the whole
-    // screen is wasteful.
-    
-    int i,j;  // Pixel indices
-    int r,g,b;
-    int ka,ks,kd; //ambient, diffuse, specular coefficients
-    int minI = max(0,(int)floor(centerX-radius));
-    int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
-    
-    int minJ = max(0,(int)floor(centerY-radius));
-    int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-    r=viewport.r;
-    g=viewport.g;
-    b=viewport.b;
-    ka=1;
-    
-    
-    for (i=0;i<viewport.w;i++) {
-        for (j=0;j<viewport.h;j++) {
-            
-            // Location of the center of pixel relative to center of sphere
-            float x = (i+0.5-centerX);
-            float y = (j+0.5-centerY);
-            
-            float dist = sqrt(sqr(x) + sqr(y));
-            
-            if (dist<=radius) {
-                
-                // This is the front-facing Z coordinate
-                float z = sqrt(radius*radius-dist*dist);
-                
-                //ambient
-                if (viewport.f==1)
-                {
-                  r=ka*r;
-                  g=ka*g;
-                  b=ka*b;
-                }
-                //diffuse
-                if (viewport.f==2) {
-
-                }
->>>>>>> 2661c52e7d3a278432593b808656278a0fc16088
 
 
 //****************************************************
@@ -317,7 +249,8 @@ void myDisplay() {
 
 int main(int argc, char *argv[]) {
     
-    
+    int plcount=viewport.plcount;
+    int dlcount=viewport.dlcount;
     
   //This initializes glut
   glutInit(&argc, argv);
@@ -333,13 +266,6 @@ int i;
 
 
     
-
-  const char *fxn=argv[1];
-  viewport.f;
-  viewport.r=atof(argv[2]);
-  viewport.g=atof(argv[3]);
-  viewport.b=atof(argv[4]);
-
   
 /*-ka r g b
 This is the ambient color coefficients of the sphere material. The parameters r g b are numbers
@@ -371,35 +297,15 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
 
 //ambience
 
-
-
-    else if (strcmp(argv[i], "-pl") == 0)
-    {
-      for(int j = 0; j < 6; j++)
-      {
-        pointlight[numpointlights][j] = atof(argv[i + 1 + j]);
-      }
-      numpointlights++;
-    }
-
-    else if (strcmp(argv[i], "-dl") == 0)
-    {
-      for(int j = 0; j < 6; j++)
-      {
-        directionallight[numdirectionallights][j] = atof(argv[i + 1 + j]);
-      }
-      numdirectionallights++;
-
-    }
-  }
+ 
 
 
   for (int a=1; a<=(argc-1); a++) {
     const char *fxn=argv[a];
+ 
 
     //ambient; -kx r g b
-    if ((strcmp(fxn, "-ka\n") == 0) or strcmp(fxn, "-ka\n") == 0) or strcmp(fxn, "-ka\n") == 0)) {
-    viewport.amb=true;
+    if ((strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0)) {
     if (strcmp(fxn, "-ka\n") == 0) {
       viewport.func=1; // change f to indicate function
       //change rgb values
@@ -412,6 +318,7 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
       viewport.func=3;
     }
     //update rgb values for ambience
+    
       viewport.ra=atof(argv[2]);
       viewport.ga=atof(argv[3]);
       viewport.ba=atof(argv[4]);
@@ -419,7 +326,6 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
     }
     //specular: -sp v
     else if ((strcmp(fxn,"-sp\n"))) {
-      viewport.spec=true;
       viewport.spec_coeff=atof(argv[a+1]);
     }
 
@@ -430,7 +336,7 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
      // for (int pl=0, pl<5;pl++) {
        // if plcount[pl]==false {
           for (int addpl=0; addpl<6; addpl++){
-          pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
+          viewport.pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
         }
         plcount++;
     }
@@ -441,7 +347,7 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
           for (int adddl=0; adddl<6; adddl++){
-          dl_array[dlcount][addpl]=atof(argv[a+1+adddl]);
+          viewport.dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
         }
         dlcount++;
       }

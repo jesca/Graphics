@@ -246,142 +246,113 @@ void myDisplay() {
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
-
-
-
 int main(int argc, char *argv[]) {
     
+    int plcount=viewport.plcount;
+    int dlcount=viewport.dlcount;
+    
+    //This initializes glut
+    glutInit(&argc, argv);
+    
+    //This tells glut to use a double-buffered window with red, green, and blue channels
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    /*
+     int i;
+     for (i=1; i<= 3; i++) {
+     printf("\narg%d=%s", i, argv[i]);
+     }*/
     
     
-  //This initializes glut
-  glutInit(&argc, argv);
-  
-  //This tells glut to use a double-buffered window with red, green, and blue channels 
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-/*
-int i;
-  for (i=1; i<= 3; i++) {
-    printf("\narg%d=%s", i, argv[i]);
- }*/
-
-
-
     
-
-  const char *fxn=argv[1];
-  viewport.f;
-  viewport.r=atof(argv[2]);
-  viewport.g=atof(argv[3]);
-  viewport.b=atof(argv[4]);
-
-  
-/*-ka r g b
-This is the ambient color coefficients of the sphere material. The parameters r g b are numbers
-between 0 and 1 inclusive.
-
-• -kd r g b
-This is the diffuse color coefficients of the sphere material. The parameters r g b are numbers
-between 0 and 1 inclusive.
-
-• -ks r g b
-This is the specular color coefficients of the sphere material. The parameters r g b are numbers
-between 0 and 1 inclusive.
-
-• -sp v
-This is the power coefficient on the specular term. It is a number between 0 and max_float.
-
-• -pl x y z r g b
-This adds a point light to the scene. The x y z values are the location of the light. The r g b
-values are it's color. Note that the x y z values are relative to the sphere. That is, the center of
-the sphere is at the origin and the radius of the sphere defines one unit of length. The Y direction
-is UP, the X direction is to the right on the screen, and the Z direction is "in your face." The
-r g b value are between 0 and max_float, NOT between 0 and 1 (that is, the r g b values encode
-the brightness of the light).
-
-• -dl x y z r g b
-This adds a directional light to the scene. The x y z values are the direction that the light
-points in. The r g b values are it's color. See -pl for coordinate system notes
-*/
-
-//ambience
-
-
-
-    else if (strcmp(argv[i], "-pl") == 0)
-    {
-      for(int j = 0; j < 6; j++)
-      {
-        pointlight[numpointlights][j] = atof(argv[i + 1 + j]);
-      }
-      numpointlights++;
-    }
-
-    else if (strcmp(argv[i], "-dl") == 0)
-    {
-      for(int j = 0; j < 6; j++)
-      {
-        directionallight[numdirectionallights][j] = atof(argv[i + 1 + j]);
-      }
-      numdirectionallights++;
-
-    }
-  }
-
-
-  for (int a=1; a<=(argc-1); a++) {
-    const char *fxn=argv[a];
-
-    //ambient; -kx r g b
-    if ((strcmp(fxn, "-ka\n") == 0) or strcmp(fxn, "-ka\n") == 0) or strcmp(fxn, "-ka\n") == 0)) {
-    viewport.amb=true;
-    if (strcmp(fxn, "-ka\n") == 0) {
-      viewport.func=1; // change f to indicate function
-      //change rgb values
-    }
-    else if (strcmp(fxn, "-ks\n") == 0) {
-      viewport.func=2;
-    }
-    //diffusion
-    else if (strcmp(fxn, "-kd\n") == 0) {
-      viewport.func=3;
-    }
-    //update rgb values for ambience
-      viewport.ra=atof(argv[2]);
-      viewport.ga=atof(argv[3]);
-      viewport.ba=atof(argv[4]);
-
-    }
-    //specular: -sp v
-    else if ((strcmp(fxn,"-sp\n"))) {
-      viewport.spec=true;
-      viewport.spec_coeff=atof(argv[a+1]);
-    }
-
-    //can have a total of 5 point lights, 5 direction lights, total 10 
-
-    //-pl x y z r g b 
-     if (strcmp(fxn, "-pl\n") == 0) {
-     // for (int pl=0, pl<5;pl++) {
-       // if plcount[pl]==false {
-          for (int addpl=0; addpl<6; addpl++){
-          pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
-        }
-        plcount++;
-    }
-  
+    
+    
+    /*-ka r g b
+     This is the ambient color coefficients of the sphere material. The parameters r g b are numbers
+     between 0 and 1 inclusive.
+     
+     • -kd r g b
+     This is the diffuse color coefficients of the sphere material. The parameters r g b are numbers
+     between 0 and 1 inclusive.
+     
+     • -ks r g b
+     This is the specular color coefficients of the sphere material. The parameters r g b are numbers
+     between 0 and 1 inclusive.
+     
+     • -sp v
+     This is the power coefficient on the specular term. It is a number between 0 and max_float.
+     
+     • -pl x y z r g b
+     This adds a point light to the scene. The x y z values are the location of the light. The r g b
+     values are it's color. Note that the x y z values are relative to the sphere. That is, the center of
+     the sphere is at the origin and the radius of the sphere defines one unit of length. The Y direction
+     is UP, the X direction is to the right on the screen, and the Z direction is "in your face." The
+     r g b value are between 0 and max_float, NOT between 0 and 1 (that is, the r g b values encode
+     the brightness of the light).
+     
+     • -dl x y z r g b
+     This adds a directional light to the scene. The x y z values are the direction that the light
+     points in. The r g b values are it's color. See -pl for coordinate system notes
+     */
+    
+    //ambience
+    
+    
+    
+    
+    for (int a=1; a<=(argc-1); a++) {
+        const char *fxn=argv[a];
         
-//• -dl x y z r g b
-    if (strcmp(fxn, "-pl\n") == 0) {
-     // for (int dl=0, dl<5;dl++) {
-       // if plcount[dl]==false {
-          for (int adddl=0; adddl<6; adddl++){
-          dl_array[dlcount][addpl]=atof(argv[a+1+adddl]);
+        
+        //ambient; -kx r g b
+        if ((strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0)) {
+            if (strcmp(fxn, "-ka\n") == 0) {
+                viewport.func=1; // change f to indicate function
+                //change rgb values
+            }
+            else if (strcmp(fxn, "-ks\n") == 0) {
+                viewport.func=2;
+            }
+            //diffusion
+            else if (strcmp(fxn, "-kd\n") == 0) {
+                viewport.func=3;
+            }
+            //update rgb values for ambience
+            
+            viewport.ra=atof(argv[2]);
+            viewport.ga=atof(argv[3]);
+            viewport.ba=atof(argv[4]);
+            
         }
-        dlcount++;
-      }
-  }
-
-
+        //specular: -sp v
+        else if ((strcmp(fxn,"-sp\n"))) {
+            viewport.spec_coeff=atof(argv[a+1]);
+        }
+        
+        //can have a total of 5 point lights, 5 direction lights, total 10
+        
+        //-pl x y z r g b
+        if (strcmp(fxn, "-pl\n") == 0) {
+            // for (int pl=0, pl<5;pl++) {
+            // if plcount[pl]==false {
+            for (int addpl=0; addpl<6; addpl++){
+                viewport.pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
+            }
+            plcount++;
+        }
+        
+        
+        //• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
+        if (strcmp(fxn, "-pl\n") == 0) {
+            // for (int dl=0, dl<5;dl++) {
+            // if plcount[dl]==false {
+            for (int adddl=0; adddl<6; adddl++){
+                viewport.dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
+            }
+            dlcount++;
+        }
+    }
+    
+    
     // testing functions here
     float test1[] = {3, 4, 2};
     float test2[] = {1, 2, 3};
@@ -395,31 +366,31 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
     for(int i = 0; i < 3; i++) {
         printf("%f, \n", test1[i]);
     }
- 
- 
-
-
-  
-
-
-  // Initalize theviewport size
-  viewport.w = 400;
-  viewport.h = 400;
-
-  //The size and position of the window
-  glutInitWindowSize(viewport.w, viewport.h);
-  glutInitWindowPosition(0,0);
-  glutCreateWindow(argv[0]);
-
-  initScene();                          // quick function to set up scene
-
-  glutDisplayFunc(myDisplay);               // function to run when its time to draw something
-  glutReshapeFunc(myReshape);               // function to run when the window gets resized
-
-  glutMainLoop();                           // infinite loop that will keep drawing and resizing
-  // and whatever else
-
-  return 0;
+    
+    
+    
+    
+    
+    
+    
+    // Initalize theviewport size
+    viewport.w = 400;
+    viewport.h = 400;
+    
+    //The size and position of the window
+    glutInitWindowSize(viewport.w, viewport.h);
+    glutInitWindowPosition(0,0);
+    glutCreateWindow(argv[0]);
+    
+    initScene();                          // quick function to set up scene
+    
+    glutDisplayFunc(myDisplay);               // function to run when its time to draw something
+    glutReshapeFunc(myReshape);               // function to run when the window gets resized
+    
+    glutMainLoop();                           // infinite loop that will keep drawing and resizing
+    // and whatever else
+    
+    return 0;
 }
 
 

@@ -39,7 +39,7 @@ class Viewport {
   public:
     int w, h, func; // width and height
     // f is the cmd line option differentiating ambient, specular, diffuse
-    float ra,ga,ba, rs,gs,bs,rd,gd,rd;
+    float ra,ga,ba, rs,gs,bs,rd,gd;
     //rgb are values also passed in from cmd line
     bool amb,diff;
    // bool plcount[]={false,false,false,false,false}; //5 point lights total
@@ -144,13 +144,13 @@ void circle(float centerX, float centerY, float radius) {
     */
         //getting the unit normal vectors for centerx, centery, 
 
-                float veclen = getLen(x,y,z);
-                float xnorm = x/veclen;
-                float ynorm = y/veclen;
-                float znorm = z/veclen;
+            //    float veclen = getLen(x,y,z);
+              //  float xnorm = x/veclen;
+               // float ynorm = y/veclen;
+                //float znorm = z/veclen;
 
 
-                setPixel(i,j, r, g, b);
+                setPixel(i,j, viewport.ra, viewport.ga, viewport.ba); //not final
                 
 
                 // This is amusing, but it assumes negative color values are treated reasonably.
@@ -165,12 +165,7 @@ void circle(float centerX, float centerY, float radius) {
     glEnd();
 }
 
-
-//get vector length of 3 variables
-float getLen(float x, float y, float z) {
-    return sqrt(sqr(x)+sqr(y)+sqr(z));
-}
-
+ 
 // Dot Product
 float dot(int length, float vec1[], float vec2[]) {
     float sum = 0;

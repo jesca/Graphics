@@ -59,9 +59,7 @@ Viewport    viewport;
     float rgb[3];
 
    // float ambiencergb[3]={0,0,0};
-    float rambience;
-    float gambience;
-    float bambience;
+    float rgbambience[]={0,0,0};
     float rgbdiffuse[3]={0,0,0};
     float rgbspec[3]={0,0,0};
 
@@ -186,8 +184,10 @@ void circle(float centerX, float centerY, float radius) {
 
 
 
-   float dl_dir[3]; // directional light direction
     float dl_color[3];
+    float ramb=rgbambience[0];
+    float gamb=rgbambience[1];
+    float bamb=rgbambience[2];
 
     for (i=0;i<viewport.w;i++) {
         for (j=0;j<viewport.h;j++) {
@@ -203,14 +203,22 @@ void circle(float centerX, float centerY, float radius) {
                 float xyz[3]={x,y,z};
                 normalize(3,xyz);
 
-                 
+                 float dl_dir[3];
                 float dn_dotproduct;
 
-            for (int i = 0; i < dlcount; i++)
+
+
+
+                // ka * I ... ka=.1kd
+                if (dlcount>1) {
+            for (int k = 0; k < dlcount; k++)
              {
-             final_rgb_ambience[i] += rambience * dl_dir[i][3];
-             final_rgb_ambience[i] += gambience * dl_dir[i][4];
-             final_rgb_ambience[i] += bambience * dl_dir[i][5];
+
+             final_rgb_ambience[1] += ramb * dl_array[k][3];
+             final_rgb_ambience[2] += gamb * dl_array[k][4];
+             final_rgb_ambience[3] += bamb *dl_array[k][5];
+            }
+           
           }
 
 
@@ -232,7 +240,7 @@ void circle(float centerX, float centerY, float radius) {
                     }
                 }
 
-                for (x=0; x<3; x++) {
+                for (int x=0; x<3; x++) {
                     final_rgb[x]+=final_rgb_diffuse[x] + final_rgb_ambience[x];
                 }
                 

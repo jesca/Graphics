@@ -38,12 +38,9 @@ class Viewport {
   public:
     int w, h, func; // width and height
     // f is the cmd line option differentiating ambient, specular, diffuse
-    float ra,ga,ba, rs,gs,bs,rd,gd;
    // bool plcount[]={false,false,false,false,false}; //5 point lights total
-    int plcount, dlcount;
-    float pl_array[5][6];
-    float dl_array[5][6];
-    float spec_coeff;
+
+    
 
 };
 
@@ -54,7 +51,12 @@ class Viewport {
 Viewport    viewport;
 
 
-
+    int plcount, dlcount;
+    float pl_array[5][6];
+    float dl_array[5][6];
+    float spec_coeff;
+    float ld[3] = {};
+    float rgb[3];
 
 //****************************************************
 // Simple init function
@@ -112,14 +114,12 @@ void circle(float centerX, float centerY, float radius) {
   // screen is wasteful.
 
    int i,j;  // Pixel indices
-    int ka;
     int minI = max(0,(int)floor(centerX-radius));
     int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
     
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-    ka=.2;
-    
+        
  
 
 
@@ -130,24 +130,27 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
-            
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
                 /*
                      For the equation, x + 2y + 2z = 9, the vector A = (1, 2, 2) is a normal vector. |A| = square root of (1+4+4) = 3. 
-     Thus the vector (1/3)A is a unit normal vector for this plane. Also, (-1/3)A is a unit vector. 
-     Unit normal vectors: (1/3, 2/3, 2/3) and (-1/3, -2/3, -2/3)
-    */
-        //getting the unit normal vectors for centerx, centery, 
+                 Thus the vector (1/3)A is a unit normal vector for this plane. Also, (-1/3)A is a unit vector. 
+        Unit normal vectors: (1/3, 2/3, 2/3) and (-1/3, -2/3, -2/3)
+           */
+    //getting the unit normal vectors for centerx, centery, 
 
                 ///float xnorm = x/veclen;
                 //float ynorm = y/veclen;
                 //float znorm = z/veclen;
+
+
+                //Diffuse component kdI(ˆl·nˆ)
+
                 
 
 
-                setPixel(i,j, viewport.ra, viewport.ga, viewport.ba);
+                setPixel(i,j, 1, 1, 0);
                 
 
                 // This is amusing, but it assumes negative color values are treated reasonably.
@@ -273,10 +276,6 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
 int main(int argc, char *argv[]) {
 
     
-    int plcount=viewport.plcount;
-    int dlcount=viewport.dlcount;
-           printf ("%s \n", "passed pldlcount");
-
   //This initializes glut
   glutInit(&argc, argv);
   
@@ -290,45 +289,38 @@ int i;
 
   for (int a=1; a<argc;) {
     const char *fxn=argv[a];
-           printf ("%s \n", "pssed for");
 
  
-
     //ambient; -kx r g b
     if ((strcmp(fxn, "-ka") == 0) or (strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0)) {
-       printf ("%s \n", "reached first if");
-    if (strcmp(fxn, "-ka\n") == 0) {
-      viewport.func=1; // change f to indicate function
-      //change rgb values
-    }
-    else if (strcmp(fxn, "-ks\n") == 0) {
-      viewport.func=2;
-    }
-    //diffusion
-    else if (strcmp(fxn, "-kd\n") == 0) {
-      viewport.func=3;
-    }
+     //  printf ("%s \n", "reached first if");
     //update rgb values for ambience
-    
-      viewport.ra=atof(argv[2]);
-      viewport.ga=atof(argv[3]);
-      viewport.ba=atof(argv[4]);
-    a+=4;
-    }
+
+        for (int color=0; color<3; color++){
+            for (int arg=2; arg<=4; arg++){
+            rgb[color]=atof(argv[arg]);
+            arg++;
+        }
+        }
+         a+=4;
+        }
+
+
+
     //specular: -sp v
     else if ((strcmp(fxn,"-sp\n"))) {
-      viewport.spec_coeff=atof(argv[a+1]);
+      spec_coeff=atof(argv[a+1]);
       a+=2;
     }
 
     //can have a total of 5 point lights, 5 direction lights, total 10 
 
     //-pl x y z r g b 
-     if (strcmp(fxn, "-pl\n") == 0) {
+     else if (strcmp(fxn, "-pl\n") == 0) {
      // for (int pl=0, pl<5;pl++) {
        // if plcount[pl]==false {
           for (int addpl=0; addpl<6; addpl++){
-          viewport.pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
+          pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
         }
         plcount++;
         a+=7;
@@ -336,16 +328,18 @@ int i;
   
         
 //• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
-    if (strcmp(fxn, "-dl\n") == 0) {
+    else if (strcmp(fxn, "-dl\n") == 0) {
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
           for (int adddl=0; adddl<6; adddl++){
-          viewport.dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
+          dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
         }
         dlcount++;
         a+=7;
 
       }
+
+
       else {
                 std::cerr << "--arg not recognized" << std::endl;
 

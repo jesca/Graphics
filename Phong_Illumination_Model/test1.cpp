@@ -1,4 +1,3 @@
-
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -164,11 +163,7 @@ void circle(float centerX, float centerY, float radius) {
 }
 
 
-//get vector length of 3 variables
-float getLen(float x, float y, float z) {
-    return sqrt(sqr(x)+sqr(y)+sqr(z));
-}
-
+ 
 // Dot Product
 float dot(int length, float vec1[], float vec2[]) {
     float sum = 0;
@@ -299,13 +294,13 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
 
  
 
-
   for (int a=1; a<=(argc-1); a++) {
     const char *fxn=argv[a];
  
 
     //ambient; -kx r g b
     if ((strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0)) {
+       printf ("%s \n", "reached first if");
     if (strcmp(fxn, "-ka\n") == 0) {
       viewport.func=1; // change f to indicate function
       //change rgb values
@@ -322,6 +317,11 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
       viewport.ra=atof(argv[2]);
       viewport.ga=atof(argv[3]);
       viewport.ba=atof(argv[4]);
+       std::cerr << "Usage: " << argv[0] << " <option(s)> SOURCES"
+              << "Options:\n"
+              << "\t-h,--help\t\tShow this help message\n"
+              << "\t-d,--destination DESTINATION\tSpecify the destination path"
+              << std::endl;
 
     }
     //specular: -sp v
@@ -344,6 +344,7 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
         
 //• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
     if (strcmp(fxn, "-pl\n") == 0) {
+    if (strcmp(fxn, "-dl\n") == 0) {
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
           for (int adddl=0; adddl<6; adddl++){
@@ -352,6 +353,7 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
         dlcount++;
       }
   }
+}
 
 
     // testing functions here

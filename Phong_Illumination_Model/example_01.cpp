@@ -95,6 +95,59 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
   // bug on inst machines.
 }
 
+
+//get vector length of 3 variables
+float getLen(float x, float y, float z) {
+    return sqrt(sqr(x)+sqr(y)+sqr(z));
+}
+
+// Dot Product
+float dot(int length, float vec1[], float vec2[]) {
+    float sum = 0;
+    for (int i = 0; i<length; i++) {
+        sum += vec1[i]*vec2[i];
+    }
+    return sum;
+}
+
+// Norm (Vector length)
+float norm(int length, float vec[]) {
+    float sum = 0;
+    for (int i = 0; i<length; i++) {
+        sum += vec[i]*vec[i];
+    }
+    return sqrt(sum);
+}
+
+// Normalize
+void normalize(int length, float vec[]) {
+    float vecnorm = norm(length, vec);
+    for (int i = 0; i<length; i++) {
+        vec[i] = vec[i]/vecnorm;
+    }
+}
+
+// Diffuse
+void diffuse(float pixelColor[], float l[], float n[]) {
+    normalize(3, l);
+    normalize(3, n);
+    float lDotn = dot(3, l, n);
+    for(int i = 0; i < 3; i++) {
+        pixelColor[i] *= lDotn;
+    }
+}
+
+// Specular
+void specular(float pixelColor[], float r[], float v[], float p) {
+    normalize(3, r);
+    normalize(3, v);
+    float rDotv = dot(3, r, v);
+    float rDotvP = pow(rDotv, p);
+    for(int i = 0; i < 3; i++) {
+        pixelColor[i] *= rDotvP;
+    }
+}
+
 //****************************************************
 // Draw a filled circle.  
 //****************************************************
@@ -134,6 +187,9 @@ void circle(float centerX, float centerY, float radius) {
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
+                float n[] = {x, y, z};
+                normalize(3, n);
+                normalize(3, viewport.pl_array[0]); // starting with one light source for simplicity, generalize to 5 later...
                 /*
                      For the equation, x + 2y + 2z = 9, the vector A = (1, 2, 2) is a normal vector. |A| = square root of (1+4+4) = 3. 
      Thus the vector (1/3)A is a unit normal vector for this plane. Also, (-1/3)A is a unit vector. 
@@ -163,57 +219,7 @@ void circle(float centerX, float centerY, float radius) {
 }
 
 
-//get vector length of 3 variables
-float getLen(float x, float y, float z) {
-    return sqrt(sqr(x)+sqr(y)+sqr(z));
-}
 
-// Dot Product
-float dot(int length, float vec1[], float vec2[]) {
-    float sum = 0;
-    for (int i = 0; i<length; i++) {
-        sum += vec1[i]*vec2[i];
-    }
-    return sum;
-}
-
-// Norm (Vector length)
-float norm(int length, float vec[]) {
-    float sum = 0;
-    for (int i = 0; i<length; i++) {
-        sum += vec[i]*vec[i];
-    }
-    return sqrt(sum);
-}
-
-// Normalize
-float normalize(int length, float vec[]) {
-    float vecnorm = norm(length, vec);
-    for (int i = 0; i<length; i++) {
-        vec[i] = vec[i]/vecnorm;
-    }
-}
-
-// Diffuse
-void diffuse(float pixelColor[], float l[], float n[]) {
-    normalize(3, l);
-    normalize(3, n);
-    float lDotn = dot(3, l, n);
-    for(int i = 0; i < 3; i++) {
-        pixelColor[i] *= lDotn;
-    }
-}
-
-// Specular
-void specular(float pixelColor[], float r[], float v[], float p) {
-    normalize(3, r);
-    normalize(3, v);
-    float rDotv = dot(3, r, v);
-    float rDotvP = pow(rDotv, p);
-    for(int i = 0; i < 3; i++) {
-        pixelColor[i] *= rDotvP;
-    }
-}
 
 
  

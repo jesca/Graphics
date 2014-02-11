@@ -11,10 +11,10 @@ endif
 	
 RM = /bin/rm -f 
 all: main 
-main: example_01.o 
-	$(CC) $(CFLAGS) -o as1 example_01.o $(LDFLAGS) 
-example_01.o: example_01.cpp
-	$(CC) $(CFLAGS) -c example_01.cpp -o example_01.o
+main: most_recent.o 
+	$(CC) $(CFLAGS) -o as1 most_recent.o $(LDFLAGS) 
+most_recent.o: most_recent.cpp
+	$(CC) $(CFLAGS) -c most_recent.cpp -o most_recent.o
 clean: 
 	$(RM) *.o as1
  

@@ -240,6 +240,28 @@ void myDisplay() {
 // the usual stuff, nothing exciting here
 //****************************************************
 
+
+
+int main(int argc, char *argv[]) {
+    
+    int plcount=viewport.plcount;
+    int dlcount=viewport.dlcount;
+    
+  //This initializes glut
+  glutInit(&argc, argv);
+  
+  //This tells glut to use a double-buffered window with red, green, and blue channels 
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+/*
+int i;
+  for (i=1; i<= 3; i++) {
+    printf("\narg%d=%s", i, argv[i]);
+ }*/
+
+
+
+    
+  
 /*-ka r g b
 This is the ambient color coefficients of the sphere material. The parameters r g b are numbers
 between 0 and 1 inclusive.
@@ -270,32 +292,14 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
 
 //ambience
 
-int main(int argc, char *argv[]) {
+ 
 
-    
-    int plcount=viewport.plcount;
-    int dlcount=viewport.dlcount;
-           printf ("%s \n", "passed pldlcount");
-
-  //This initializes glut
-  glutInit(&argc, argv);
-  
-  //This tells glut to use a double-buffered window with red, green, and blue channels 
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-/*
-int i;
-  for (i=1; i<= 3; i++) {
-    printf("\narg%d=%s", i, argv[i]);
- }*/
-
-  for (int a=1; a<argc;) {
+  for (int a=1; a<=(argc-1); a++) {
     const char *fxn=argv[a];
-           printf ("%s \n", "pssed for");
-
  
 
     //ambient; -kx r g b
-    if ((strcmp(fxn, "-ka") == 0) or (strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0)) {
+    if ((strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0) or (strcmp(fxn, "-ka\n") == 0)) {
        printf ("%s \n", "reached first if");
     if (strcmp(fxn, "-ka\n") == 0) {
       viewport.func=1; // change f to indicate function
@@ -313,12 +317,16 @@ int i;
       viewport.ra=atof(argv[2]);
       viewport.ga=atof(argv[3]);
       viewport.ba=atof(argv[4]);
-    a+=4;
+       std::cerr << "Usage: " << argv[0] << " <option(s)> SOURCES"
+              << "Options:\n"
+              << "\t-h,--help\t\tShow this help message\n"
+              << "\t-d,--destination DESTINATION\tSpecify the destination path"
+              << std::endl;
+
     }
     //specular: -sp v
     else if ((strcmp(fxn,"-sp\n"))) {
       viewport.spec_coeff=atof(argv[a+1]);
-      a+=2;
     }
 
     //can have a total of 5 point lights, 5 direction lights, total 10 
@@ -331,11 +339,11 @@ int i;
           viewport.pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
         }
         plcount++;
-        a+=7;
     }
   
         
 //• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
+    if (strcmp(fxn, "-pl\n") == 0) {
     if (strcmp(fxn, "-dl\n") == 0) {
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
@@ -343,14 +351,9 @@ int i;
           viewport.dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
         }
         dlcount++;
-        a+=7;
-
-      }
-      else {
-                std::cerr << "--arg not recognized" << std::endl;
-
       }
   }
+}
 
 
     // testing functions here

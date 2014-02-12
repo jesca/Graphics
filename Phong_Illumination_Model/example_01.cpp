@@ -50,18 +50,22 @@ public:
 //****************************************************
 Viewport    viewport;
 
+struct Vec3 {
+    float x, y, z;
+};
+
 
 int plcount=0;
 int dlcount=0;
 float pl_array[5][6];
 float dl_array[5][6];
 float spec_coeff;
-float rgb[3];
+Vec3 rgb;
 
 // float ambiencergb[3]={0,0,0};
-float ka[]={0,0,0};
-float kd[3]={0,0,0};
-float ks[3]={0,0,0};
+Vec3 ka = {0,0,0};
+Vec3 kd = {0,0,0};
+Vec3 ks = {0,0,0};
 
 
 //****************************************************
@@ -106,9 +110,6 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
 //****************************************************
 // Draw a filled circle.
 //****************************************************
-struct Vec3 {
-    float x, y, z;
-};
 
 // Dot Product
 float dot(Vec3 a, Vec3 b) {
@@ -131,13 +132,14 @@ void normalize(Vec3* vec) {
 
 
 // Diffuse
-void diffuse(float diffusePart[], float I[], float l[], float n[]) {
-//    normalize(3, l);
-//    normalize(3, n);
-//    float lDotn = dot(3, l, n);
-//    for(int i = 0; i < 3; i++) {
-//        diffusePart[i] = kd[i] * I[i] * lDotn;
-//    }
+void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
+    float lDotn = dot(l, n);
+//    printf("dot %f\n", kd.y);
+    diffusePart->x = fmax(kd.x*I.x * lDotn, 0);
+    diffusePart->y = fmax(kd.y*I.y * lDotn, 0);
+    diffusePart->z = fmax(kd.z*I.z * lDotn, 0);
+    
+    
 }
 
 // Specular
@@ -171,10 +173,10 @@ void circle(float centerX, float centerY, float radius) {
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
     
-    float final_rgb_diffuse[3];
-    float final_rgb_ambience[3];
-    float final_rgb_specular[3];
-    float final_rgb[3];
+    Vec3 final_rgb_diffuse = {0,0,0};
+    Vec3 final_rgb_ambience = ka;
+    Vec3 final_rgb_specular = {0,0,0};;
+    Vec3 final_rgb = {0,0,0};
     
     //AMBIANCE
     // ka * I ... ka=.1kd
@@ -182,9 +184,9 @@ void circle(float centerX, float centerY, float radius) {
         for (int k = 0; k < dlcount; k++)
         {
             
-            final_rgb_ambience[1] += ka[0] * (dl_array[k][3]);
-            final_rgb_ambience[2] += ka[1] * (dl_array[k][4]);
-            final_rgb_ambience[3] += ka[2] *(dl_array[k][5]);
+//            final_rgb_ambience[1] += ka[0] * (dl_array[k][3]);
+//            final_rgb_ambience[2] += ka[1] * (dl_array[k][4]);
+//            final_rgb_ambience[3] += ka[2] *(dl_array[k][5]);
         }
         
     }
@@ -197,34 +199,36 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
-            float dl_I[3];
-            float dl_L[3];
-            float final_rgb_diffuse[3];
+            Vec3 dl_I;
+            Vec3 dl_L;
+
             //float dn_dotproduct;
             
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
-                float xyz[]={x,y,z};
-//                normalize(xyz);
-                
-                
+                Vec3 n = {x,y,z};
+                normalize(&n);
+//                printf("x = %f \n", n.x);
+//                printf("y = %f \n", n.y);
+//                printf("z = %f \n", n.z);
                 for (int m = 0; m<dlcount; m++) {
                     //I = intensity r g b
-                    dl_I[0]+=dl_array[m][3];
-                    dl_I[1]+=dl_array[m][4];
-                    dl_I[2]+=dl_array[m][5];
+                    dl_I.x =dl_array[m][3];
+                    dl_I.y =dl_array[m][4];
+                    dl_I.z =dl_array[m][5];
                     //L = direction xyz
-                    dl_L[0]=-dl_array[m][0];//direction
-                    dl_L[1]=-dl_array[m][1];
-                    dl_L[2]=-dl_array[m][2];
+                    dl_L.x= dl_array[m][0];//direction
+                    dl_L.y= dl_array[m][1];
+                    dl_L.z= dl_array[m][2];
 //                    printf(" = %f dl_I = %f\n", xyz, dl_I);
-//                    normalize(dl_I);
+                    normalize(&dl_L);
+                    
 //                    printf("xyz = %f dl_I = %f\n", xyz, dl_I);
                     
                     //should already be normalized
 //                    dn_dotproduct=dot(3, dl_L,xyz);
-                    diffuse(final_rgb_diffuse, dl_I, dl_L, xyz);
+                    
 //                    for (int i=0; i<3; i++) {
 //                        final_rgb_diffuse[i] += diffusePart[i];
 //                    }
@@ -233,13 +237,17 @@ void circle(float centerX, float centerY, float radius) {
                 }
                 
                 
+//                printf("x = %f \n", final_rgb_diffuse.x);
+//                printf("y = %f \n", final_rgb_diffuse.y);
+//                printf("z = %f \n", final_rgb_diffuse.z);
+            diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
                 
-                for (int x=0; x<3; x++) {
-                    final_rgb[x]+=final_rgb_diffuse[x]+final_rgb_ambience[x]+final_rgb_specular[x];
-                }
+            final_rgb.x += final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
+            final_rgb.y += final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
+            final_rgb.z += final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
                 
-                
-                setPixel(i,j, final_rgb[0], final_rgb[1], final_rgb[2]);
+            setPixel(i,j, final_rgb_diffuse.x, final_rgb_diffuse.y, final_rgb_diffuse.z);
+
                 
                 
                 // This is amusing, but it assumes negative color values are treated reasonably.
@@ -336,34 +344,38 @@ int main(int argc, char *argv[]) {
             //update rgb values for ambience
             printf ("%s \n", fxn);
             
-            for (int color=0; color<3; color++){
-                for (int arg=2; arg<=4; arg++){
-                    ka[color]=atof(argv[arg]);
-                    arg++;
-                }
-            }
+            
+//            for (int arg=2; arg<=4; arg++){
+//                ka.x=atof(argv[arg]);
+//                arg++;
+//            }
+//            for (int arg=2; arg<=4; arg++){
+//                ka.y=atof(argv[arg]);
+//                arg++;
+//            }
+//            for (int arg=2; arg<=4; arg++){
+//                ka.z=atof(argv[arg]);
+//                arg++;
+//            }
+            ka.x=atof(argv[2]);
+            ka.y=atof(argv[3]);
+            ka.z=atof(argv[4]);
             a+=4;
         }
         
         else if ((strcmp(fxn, "-kd") == 0)) {
-            for (int color=0; color<3; color++){
-                for (int arg=2; arg<=4; arg++){
-                    kd[color]=atof(argv[arg]);
-                    arg++;
-                }
-            }
+            kd.x=atof(argv[2]);
+            kd.y=atof(argv[3]);
+            kd.z=atof(argv[4]);
             a+=4;
         }
         
         else if ((strcmp(fxn, "-ks") == 0)) {
             printf ("%s \n", fxn);
             
-            for (int color=0; color<3; color++){
-                for (int arg=2; arg<=4; arg++){
-                    ks[color]=atof(argv[arg]);
-                    arg++;
-                }
-            }
+            ks.x=atof(argv[2]);
+            ks.y=atof(argv[3]);
+            ks.z=atof(argv[4]);
             a+=4;
         }
         
@@ -416,14 +428,11 @@ int main(int argc, char *argv[]) {
     
     
     // testing functions here
-    Vec3 test1;
-    test1.x = 3;
-    test1.y = 4;
-    test1.z = 2;
-    Vec3 test2;
-    test2.x = 1;
-    test2.y = 2;
-    test2.z = 3;
+    Vec3 test1 = {3, 4, 2};
+//    test1.x = 3;
+//    test1.y = 4;
+//    test1.z = 2;
+    Vec3 test2 = {1, 2, 3};
     
     float dotp = dot(test1, test2);
     printf("should be 17.0: %f\n", dotp);
@@ -437,7 +446,13 @@ int main(int argc, char *argv[]) {
     printf("should be 0.742781: %f, \n", test1.y);
     printf("should be 0.371391: %f, \n", test1.z);
     
-    
+    normalize(&test2);
+    Vec3 test3 = {0, 0, 0};
+    Vec3 test4 = {3, 2, 1};
+    diffuse(&test3, test4, test1, test2);
+    printf("%f, \n", test3.x);
+    printf("%f, \n", test3.y);
+    printf("%f, \n", test3.z);
     
     
     

@@ -66,6 +66,7 @@ Vec3 rgb;
 Vec3 ka = {0,0,0};
 Vec3 kd = {0,0,0};
 Vec3 ks = {0,0,0};
+Vec3 view={0,0,1};
 
 
 //****************************************************
@@ -142,15 +143,17 @@ void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
     
 }
 
-// Specular
-void specular(float pixelColor[], float r[], float v[], float p) {
-//    normalize(3, r);
-//    normalize(3, v);
-//    float rDotv = dot(3, r, v);
-//    float rDotvP = pow(rDotv, p);
-//    for(int i = 0; i < 3; i++) {
-//        pixelColor[i] *= rDotvP;
-//    }
+ 
+
+
+// spec  
+void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
+    //    printf("dot %f\n", kd.y);
+    float rDotv=dot(r,v);
+       spec->x = ks.x*I.x * pow(max(rDotv,0.0f),spec_coeff);
+       spec->y = ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
+       spec->z = ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
+
 }
 
 
@@ -177,19 +180,7 @@ void circle(float centerX, float centerY, float radius) {
     Vec3 final_rgb_ambience = ka;
     Vec3 final_rgb_specular = {0,0,0};;
     Vec3 final_rgb = {0,0,0};
-    
-    //AMBIANCE
-    // ka * I ... ka=.1kd
-    if (dlcount>1) {
-        for (int k = 0; k < dlcount; k++)
-        {
-            
-//            final_rgb_ambience[1] += ka[0] * (dl_array[k][3]);
-//            final_rgb_ambience[2] += ka[1] * (dl_array[k][4]);
-//            final_rgb_ambience[3] += ka[2] *(dl_array[k][5]);
-        }
-        
-    }
+
     
     
     for (i=0;i<viewport.w;i++) {
@@ -199,56 +190,98 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
-            Vec3 dl_I;
-            Vec3 dl_L;
-
-            //float dn_dotproduct;
+            Vec3 dl_I;   
+            Vec3 dl_L;  
+            Vec3 pl_I;
+            Vec3 pl_L;
             
+             
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
                 Vec3 n = {x,y,z};
-                normalize(&n);
-//                printf("x = %f \n", n.x);
-//                printf("y = %f \n", n.y);
-//                printf("z = %f \n", n.z);
+                normalize(&n);  //normalizes vector
+                
+                
+                
                 for (int m = 0; m<dlcount; m++) {
                     //I = intensity r g b
                     dl_I.x =dl_array[m][3];
                     dl_I.y =dl_array[m][4];
                     dl_I.z =dl_array[m][5];
                     //L = direction xyz
-                    dl_L.x= dl_array[m][0];//direction
-                    dl_L.y= dl_array[m][1];
-                    dl_L.z= dl_array[m][2];
-//                    printf(" = %f dl_I = %f\n", xyz, dl_I);
+                    dl_L.x= -dl_array[m][0];//direction
+                    dl_L.y= -dl_array[m][1];
+                    dl_L.z= -dl_array[m][2];
                     normalize(&dl_L);
                     
-//                    printf("xyz = %f dl_I = %f\n", xyz, dl_I);
                     
-                    //should already be normalized
-//                    dn_dotproduct=dot(3, dl_L,xyz);
+                    //diffuse reflection
+                    float tempdot = dl_L.z * n.x + dl_L.y * n.y + n.z * dl_L.z;
+                    float rx = dl_L.x + 2*(tempdot)*n.x;
+                    float ry = dl_L.y + 2*(tempdot)*n.y;
+                    float rz = dl_L.z + 2*(tempdot)*n.z;
+                //    final_rgb_specular.x+=ks.x*dl_array[m][3]*max(tempdot,0.0f);
+                 //    printf ("%s %f \n", " r spec: ", final_rgb_specular.x);
+                //    final_rgb_specular.y+=ks.y*dl_array[m][4]*max(tempdot,0.0f);
+                 //   printf ("%s %f \n", " gspec: ", final_rgb_specular.y);
+
+                //    final_rgb_specular.z+=ks.z*dl_array[m][5]*max(tempdot,0.0f);
                     
-//                    for (int i=0; i<3; i++) {
-//                        final_rgb_diffuse[i] += diffusePart[i];
-//                    }
-                    
-                    
+                    diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
+
+                   
+
                 }
                 
                 
-//                printf("x = %f \n", final_rgb_diffuse.x);
-//                printf("y = %f \n", final_rgb_diffuse.y);
-//                printf("z = %f \n", final_rgb_diffuse.z);
-            diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
-                
-            final_rgb.x += final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
-            final_rgb.y += final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
-            final_rgb.z += final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
-                
-            setPixel(i,j, final_rgb_diffuse.x, final_rgb_diffuse.y, final_rgb_diffuse.z);
+                for (int m = 0; m < plcount; m++)
+                {
+                  
+                    //I r g b
+                    pl_I.x =pl_array[m][3];
+                    pl_I.y =pl_array[m][4];
+                    pl_I.z =pl_array[m][5];
+                    //dir x y z 
+                    pl_L.x= (pl_array[m][0]);//direction
+                    pl_L.y= (pl_array[m][1]);
+                    pl_L.z= (pl_array[m][2]);
+                    normalize(&pl_L);
+                 
+                    float pldotn =dot(n,pl_L);
+                    
+                    //r=d-2(d*nnorm)norm -- REFLECTION will be passed back to pl_L to spec function
+                    float rx = -pl_L.x + 2*(pldotn)*n.x;
+                    float ry = -pl_L.y + 2*(pldotn)*n.y;
+                    float rz = -pl_L.z + 2*(pldotn)*n.z;
+                    pl_L.x=rx;
+                    pl_L.y=ry;
+                    pl_L.z=rz;
+                    
+                    // final_rgb_diffuse.x+=kd.x*pl_array[m][3]*max(pldotn,0.0f);
+                   // final_rgb_diffuse.y+=kd.y*pl_array[m][4]*max(pldotn,0.0f);
+                    //final_rgb_diffuse.z+=kd.z*pl_array[m][5]*max(pldotn,0.0f);
+
+                  
+//                   spec(&final_rgb_specular, pl_I,pl_L,view);
+
+                }
 
                 
+                
+            
+            spec(&final_rgb_specular, pl_I,pl_L,view);
+            diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
+ 
+        //        printf ("%s %f \n", "r spec final ", final_rgb_specular.x);
+        //        printf ("%s %f \n", " g spec: ", final_rgb_specular.y);
+            final_rgb.x = final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
+            final_rgb.y = final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
+            final_rgb.z = final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
+            setPixel(i,j, final_rgb_specular.x, final_rgb_specular.y, final_rgb_specular.z);
+
+               // printf ("%s %f \n", "r spec final ", final_rgb.x);
+                 //     printf ("%s %f \n", " g final: ", final_rgb.y);
                 
                 // This is amusing, but it assumes negative color values are treated reasonably.
                 // setPixel(i,j, x/radius, y/radius, z/radius );
@@ -289,37 +322,7 @@ void myDisplay() {
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
-
-/*-ka r g b
- This is the ambient color coefficients of the sphere material. The parameters r g b are numbers
- between 0 and 1 inclusive.
  
- • -kd r g b
- This is the diffuse color coefficients of the sphere material. The parameters r g b are numbers
- between 0 and 1 inclusive.
- 
- • -ks r g b
- This is the specular color coefficients of the sphere material. The parameters r g b are numbers
- between 0 and 1 inclusive.
- 
- • -sp v
- This is the power coefficient on the specular term. It is a number between 0 and max_float.
- 
- • -pl x y z r g b
- This adds a point light to the scene. The x y z values are the location of the light. The r g b
- values are it's color. Note that the x y z values are relative to the sphere. That is, the center of
- the sphere is at the origin and the radius of the sphere defines one unit of length. The Y direction
- is UP, the X direction is to the right on the screen, and the Z direction is "in your face." The
- r g b value are between 0 and max_float, NOT between 0 and 1 (that is, the r g b values encode
- the brightness of the light).
- 
- • -dl x y z r g b
- This adds a directional light to the scene. The x y z values are the direction that the light
- points in. The r g b values are it's color. See -pl for coordinate system notes
- */
-
-//ambience
-
 int main(int argc, char *argv[]) {
     
     
@@ -342,21 +345,7 @@ int main(int argc, char *argv[]) {
         if ((strcmp(fxn, "-ka") == 0)) {
             //  printf ("%s \n", "reached first if");
             //update rgb values for ambience
-            printf ("%s \n", fxn);
             
-            
-//            for (int arg=2; arg<=4; arg++){
-//                ka.x=atof(argv[arg]);
-//                arg++;
-//            }
-//            for (int arg=2; arg<=4; arg++){
-//                ka.y=atof(argv[arg]);
-//                arg++;
-//            }
-//            for (int arg=2; arg<=4; arg++){
-//                ka.z=atof(argv[arg]);
-//                arg++;
-//            }
             ka.x=atof(argv[2]);
             ka.y=atof(argv[3]);
             ka.z=atof(argv[4]);
@@ -380,18 +369,10 @@ int main(int argc, char *argv[]) {
         }
         
         
-        
-        //• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
+  
         else if (strcmp(fxn, "-dl") == 0) {
-            // for (int dl=0, dl<5;dl++) {
-            // if plcount[dl]==false {
             
             for (int adddl=0; adddl<6; adddl++){
-                //   printf ("%s \n", argv[a+1+adddl]);
-                //   printf ("%d \n", dlcount);
-                //   printf ("%d \n", adddl);
-                
-                
                 dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
             }
             dlcount++;
@@ -399,19 +380,8 @@ int main(int argc, char *argv[]) {
             
         }
         
-        
-        //specular: -sp v
-        else if ((strcmp(fxn,"-sp"))) {
-            spec_coeff=atof(argv[a+1]);
-            a+=2;
-        }
-        
-        //can have a total of 5 point lights, 5 direction lights, total 10
-        
         //-pl x y z r g b
         else if (strcmp(fxn, "-pl") == 0) {
-            // for (int pl=0, pl<5;pl++) {
-            // if plcount[pl]==false {
             for (int addpl=0; addpl<6; addpl++){
                 pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
             }
@@ -420,41 +390,21 @@ int main(int argc, char *argv[]) {
         }
         
         
-        else {
-            std::cerr << "--arg not recognized" << std::endl;
-            
+        //specular: -sp v
+        else if ((strcmp(fxn,"-sp"))) {
+            spec_coeff=atof(argv[a+1]);
+            a+=2;
         }
+        //don't get rid of this..without this it runs out of bounds and seg faults
+        else if ((strcmp(fxn,"-none"))) {
+            spec_coeff=atof(argv[a+1]);
+            a+=2;
+        }
+        
     }
     
     
-    // testing functions here
-    Vec3 test1 = {3, 4, 2};
-//    test1.x = 3;
-//    test1.y = 4;
-//    test1.z = 2;
-    Vec3 test2 = {1, 2, 3};
-    
-    float dotp = dot(test1, test2);
-    printf("should be 17.0: %f\n", dotp);
-    
-    float normtest = norm(test1);
-    printf("should be 5.3851...: %f\n", normtest);
-    
-    
-    normalize(&test1);
-    printf("should be 0.557086: %f, \n", test1.x);
-    printf("should be 0.742781: %f, \n", test1.y);
-    printf("should be 0.371391: %f, \n", test1.z);
-    
-    normalize(&test2);
-    Vec3 test3 = {0, 0, 0};
-    Vec3 test4 = {3, 2, 1};
-    diffuse(&test3, test4, test1, test2);
-    printf("%f, \n", test3.x);
-    printf("%f, \n", test3.y);
-    printf("%f, \n", test3.z);
-    
-    
+ 
     
     
     // Initalize theviewport size

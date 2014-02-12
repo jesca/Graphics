@@ -150,15 +150,15 @@ void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
        spec->y = ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
        spec->z = ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
 }
-/*
+
 // Specular
-void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v, float p) {
+void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v) {
     float rDotv = dot(r, v);
-    float rDotvP = pow(rDotv, p);
+    float rDotvP = pow(rDotv, spec_coeff);
     specPart->x = fmax(ks.x * I.x * rDotvP, 0);
     specPart->y = fmax(ks.y * I.y * rDotvP, 0);
     specPart->z = fmax(ks.z * I.z * rDotvP, 0);
-}*/
+}
 
 
 void circle(float centerX, float centerY, float radius) {
@@ -219,19 +219,11 @@ void circle(float centerX, float centerY, float radius) {
                     
                     normalize(&dl_L);
 
-                
-                    
                     //diffuse reflection
                     float tempdot = dl_L.z * n.x + dl_L.y * n.y + n.z * dl_L.z;
                     float rx = dl_L.x + 2*(tempdot)*n.x;
                     float ry = dl_L.y + 2*(tempdot)*n.y;
                     float rz = dl_L.z + 2*(tempdot)*n.z;
-                //    final_rgb_specular.x+=ks.x*dl_array[m][3]*max(tempdot,0.0f);
-                 //    printf ("%s %f \n", " r spec: ", final_rgb_specular.x);
-                //    final_rgb_specular.y+=ks.y*dl_array[m][4]*max(tempdot,0.0f);
-                 //   printf ("%s %f \n", " gspec: ", final_rgb_specular.y);
-
-                //    final_rgb_specular.z+=ks.z*dl_array[m][5]*max(tempdot,0.0f);
 
                 }
                 
@@ -245,7 +237,7 @@ void circle(float centerX, float centerY, float radius) {
                     pl_I.y =pl_array[m][4];
                     pl_I.z =pl_array[m][5];
                     //L = direction xyz
-                    pl_L.x= pl_array[m][0];//direction
+                    pl_L.x= pl_array[m][0]; 
                     pl_L.y= pl_array[m][1];
                     pl_L.z= pl_array[m][2];
                     
@@ -259,31 +251,17 @@ void circle(float centerX, float centerY, float radius) {
                     pl_L.x=refx;
                     pl_L.y=refy;
                     pl_L.z=refz;
-                    
-                    // final_rgb_diffuse.x+=kd.x*pl_array[m][3]*max(pldotn,0.0f);
-                   // final_rgb_diffuse.y+=kd.y*pl_array[m][4]*max(pldotn,0.0f);
-                    //final_rgb_diffuse.z+=kd.z*pl_array[m][5]*max(pldotn,0.0f);
-
                   
 //                   spec(&final_rgb_specular, pl_I,pl_L,view);
 
                 }
 
-                
-                
-            
+
             spec(&final_rgb_specular, pl_I,pl_L,view);
             diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
  
         //        printf ("%s %f \n", "r spec final ", final_rgb_specular.x);
         //        printf ("%s %f \n", " g spec: ", final_rgb_specular.y);
-            final_rgb.x = final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
-            final_rgb.y = final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
-            final_rgb.z = final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
-            setPixel(i,j, final_rgb_specular.x, final_rgb_specular.y, final_rgb_specular.z);
-
-
-            
                 
             final_rgb.x += final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
             final_rgb.y += final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
@@ -341,20 +319,13 @@ int main(int argc, char *argv[]) {
     
     //This tells glut to use a double-buffered window with red, green, and blue channels
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    /*
-     int i;
-     for (i=1; i<= 3; i++) {
-     printf("\narg%d=%s", i, argv[i]);
-     }*/
+ 
     
     for (int a=1; a<argc;) {
         const char *fxn=argv[a];
         printf("%s \n", fxn);
         //ambient; -kx r g b
         if ((strcmp(fxn, "-ka") == 0)) {
-            //  printf ("%s \n", "reached first if");
-            //update rgb values for ambience
-            
             ka.x=atof(argv[2]);
             ka.y=atof(argv[3]);
             ka.z=atof(argv[4]);

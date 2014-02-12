@@ -121,7 +121,6 @@ float norm(Vec3 vec) {
     return sqrt(dot(vec, vec));
 }
 
-
 // Normalize
 void normalize(Vec3* vec) {
     float vecnorm = norm(*vec);
@@ -130,32 +129,23 @@ void normalize(Vec3* vec) {
     vec->z = vec->z/vecnorm;
 }
 
-
 // Diffuse
 void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
     float lDotn = dot(l, n);
-//    printf("dot %f\n", kd.y);
-    diffusePart->x = fmax(kd.x*I.x * lDotn, 0);
-    diffusePart->y = fmax(kd.y*I.y * lDotn, 0);
-    diffusePart->z = fmax(kd.z*I.z * lDotn, 0);
-    
+    diffusePart->x = fmax(kd.x * I.x * lDotn, 0);
+    diffusePart->y = fmax(kd.y * I.y * lDotn, 0);
+    diffusePart->z = fmax(kd.z * I.z * lDotn, 0);
     
 }
 
 // Specular
-void specular(float pixelColor[], float r[], float v[], float p) {
-//    normalize(3, r);
-//    normalize(3, v);
-//    float rDotv = dot(3, r, v);
-//    float rDotvP = pow(rDotv, p);
-//    for(int i = 0; i < 3; i++) {
-//        pixelColor[i] *= rDotvP;
-//    }
+void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v, float p) {
+    float rDotv = dot(r, v);
+    float rDotvP = pow(rDotv, p);
+    specPart->x = fmax(ks.x * I.x * rDotvP, 0);
+    specPart->y = fmax(ks.y * I.y * rDotvP, 0);
+    specPart->z = fmax(ks.z * I.z * rDotvP, 0);
 }
-
-
-
-
 
 
 void circle(float centerX, float centerY, float radius) {
@@ -201,17 +191,15 @@ void circle(float centerX, float centerY, float radius) {
             float dist = sqrt(sqr(x) + sqr(y));
             Vec3 dl_I;
             Vec3 dl_L;
-
-            //float dn_dotproduct;
+            Vec3 pl_I;
+            Vec3 pl_L;
             
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
                 Vec3 n = {x,y,z};
                 normalize(&n);
-//                printf("x = %f \n", n.x);
-//                printf("y = %f \n", n.y);
-//                printf("z = %f \n", n.z);
+                
                 for (int m = 0; m<dlcount; m++) {
                     //I = intensity r g b
                     dl_I.x =dl_array[m][3];
@@ -221,17 +209,26 @@ void circle(float centerX, float centerY, float radius) {
                     dl_L.x= dl_array[m][0];//direction
                     dl_L.y= dl_array[m][1];
                     dl_L.z= dl_array[m][2];
-//                    printf(" = %f dl_I = %f\n", xyz, dl_I);
+                    
                     normalize(&dl_L);
+                    diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
+
                     
-//                    printf("xyz = %f dl_I = %f\n", xyz, dl_I);
                     
-                    //should already be normalized
-//                    dn_dotproduct=dot(3, dl_L,xyz);
+                }
+                for (int m = 0; m<plcount; m++) {
+                    //I = intensity r g b
+                    pl_I.x =pl_array[m][3];
+                    pl_I.y =pl_array[m][4];
+                    pl_I.z =pl_array[m][5];
+                    //L = direction xyz
+                    pl_L.x= pl_array[m][0];//direction
+                    pl_L.y= pl_array[m][1];
+                    pl_L.z= pl_array[m][2];
                     
-//                    for (int i=0; i<3; i++) {
-//                        final_rgb_diffuse[i] += diffusePart[i];
-//                    }
+                    normalize(&pl_L);
+                    diffuse(&final_rgb_diffuse, pl_I, pl_L, n);
+                    
                     
                     
                 }
@@ -240,7 +237,7 @@ void circle(float centerX, float centerY, float radius) {
 //                printf("x = %f \n", final_rgb_diffuse.x);
 //                printf("y = %f \n", final_rgb_diffuse.y);
 //                printf("z = %f \n", final_rgb_diffuse.z);
-            diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
+            
                 
             final_rgb.x += final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
             final_rgb.y += final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
@@ -336,8 +333,7 @@ int main(int argc, char *argv[]) {
     
     for (int a=1; a<argc;) {
         const char *fxn=argv[a];
-        
-        
+        printf("%s \n", fxn);
         //ambient; -kx r g b
         if ((strcmp(fxn, "-ka") == 0)) {
             //  printf ("%s \n", "reached first if");
@@ -412,11 +408,14 @@ int main(int argc, char *argv[]) {
         else if (strcmp(fxn, "-pl") == 0) {
             // for (int pl=0, pl<5;pl++) {
             // if plcount[pl]==false {
+            printf("a = %d\n", a);
             for (int addpl=0; addpl<6; addpl++){
                 pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
             }
             plcount++;
+            
             a+=7;
+            
         }
         
         
@@ -429,9 +428,6 @@ int main(int argc, char *argv[]) {
     
     // testing functions here
     Vec3 test1 = {3, 4, 2};
-//    test1.x = 3;
-//    test1.y = 4;
-//    test1.z = 2;
     Vec3 test2 = {1, 2, 3};
     
     float dotp = dot(test1, test2);

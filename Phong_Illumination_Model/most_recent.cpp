@@ -59,9 +59,9 @@ Viewport    viewport;
     float rgb[3];
 
    // float ambiencergb[3]={0,0,0};
-    float rgbambience[]={0,0,0};
-    float rgbdiffuse[3]={0,0,0};
-    float rgbspec[3]={0,0,0};
+    float ka[]={0,0,0};
+    float kd[3]={0,0,0};
+    float ks[3]={0,0,0};
 
 
 //****************************************************
@@ -138,12 +138,12 @@ float dot(int length, float vec1[], float vec2[]) {
 
  
 // Diffuse
-void diffuse(float pixelColor[], float l[], float n[]) {
+void diffuse(float I[], float l[], float n[]) {
     normalize(3, l);
     normalize(3, n);
     float lDotn = dot(3, l, n);
     for(int i = 0; i < 3; i++) {
-        pixelColor[i] *= lDotn;
+        I[i] =I[i]* lDotn*ka[i];
     }
 }
 
@@ -179,15 +179,23 @@ void circle(float centerX, float centerY, float radius) {
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
         
     float final_rgb_diffuse[3];
-    float final_rgb[3];
     float final_rgb_ambience[3];
+    float final_rgb_specular[3];
+    float final_rgb[3];
 
+    //AMBIANCE
+    // ka * I ... ka=.1kd
+     if (dlcount>1) {
+            for (int k = 0; k < dlcount; k++)
+             {
 
+             final_rgb_ambience[1] += ka[0] * (dl_array[k][3]);
+             final_rgb_ambience[2] += ka[1] * (dl_array[k][4]);
+             final_rgb_ambience[3] += ka[2] *(dl_array[k][5]);
+            }
+           
+    }
 
-    float dl_color[3];
-    float ramb=rgbambience[0];
-    float gamb=rgbambience[1];
-    float bamb=rgbambience[2];
 
     for (i=0;i<viewport.w;i++) {
         for (j=0;j<viewport.h;j++) {
@@ -196,6 +204,10 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
+            float dl_I[3];
+            float dl_L[3];
+            float final_rgb_diffuse[3];
+            float dn_dotproduct;
 
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
@@ -203,48 +215,31 @@ void circle(float centerX, float centerY, float radius) {
                 float xyz[3]={x,y,z};
                 normalize(3,xyz);
 
-                 float dl_dir[3];
-                float dn_dotproduct;
-
-
-
-
-                // ka * I ... ka=.1kd
-                if (dlcount>1) {
-            for (int k = 0; k < dlcount; k++)
-             {
-
-             final_rgb_ambience[1] += ramb * dl_array[k][3];
-             final_rgb_ambience[2] += gamb * dl_array[k][4];
-             final_rgb_ambience[3] += bamb *dl_array[k][5];
-            }
-           
-          }
-
-
-
-                //Diffuse component max(kd*I*(ˆl·nˆ),0)
-                if (dlcount>0) {
+            
                     for (int m = 0; m<dlcount; m++) {
-                            dl_dir[0]=dl_array[m][0];
-                            dl_dir[1]=dl_array[m][1];
-                            dl_dir[2]=dl_array[m][2];
-                            dl_color[0]=dl_array[m][3];
-                            dl_color[1]=dl_array[m][4];
-                            dl_color[2]=dl_array[m][5];
-                            dl_color[3]=dl_array[m][5];
-                            dn_dotproduct=dot(3, dl_dir,xyz);
+                            //I = intensity r g b
+                            dl_I[0]+=dl_array[m][3];
+                            dl_I[1]+=dl_array[m][4];
+                            dl_I[2]+=dl_array[m][5];
+                        //L = direction xyz
+                            dl_L[0]=-dl_array[m][0];//direction 
+                            dl_L[1]=-dl_array[m][1];
+                            dl_L[2]=-dl_array[m][2];   
+                            normalize(3,dl_L);
+
+                            //should already be normalized
+                            dn_dotproduct=dot(3, dl_L,xyz);
                             for (int i=0; i<3; i++) {
-                                final_rgb_diffuse[i]+=max(dl_dir[i]*dl_color[i]*dn_dotproduct,0.0f);
+                                final_rgb_diffuse[i]+=(kd[i]*dl_I[i]*max(dn_dotproduct,0.0f));
                             }
                     }
-                }
-
-                for (int x=0; x<3; x++) {
-                    final_rgb[x]+=final_rgb_diffuse[x] + final_rgb_ambience[x];
-                }
                 
 
+
+                for (int x=0; x<3; x++) {
+                    final_rgb[x]+=final_rgb_diffuse[x]+final_rgb_ambience[x]+final_rgb_specular[x];
+                }
+                
 
                 setPixel(i,j, final_rgb[0], final_rgb[1], final_rgb[2]);
                 
@@ -345,7 +340,7 @@ int i;
 
         for (int color=0; color<3; color++){
             for (int arg=2; arg<=4; arg++){
-            rgbambience[color]=atof(argv[arg]);
+            ka[color]=atof(argv[arg]);
             arg++;
         }
         }
@@ -354,10 +349,8 @@ int i;
 
         else if ((strcmp(fxn, "-kd") == 0)) {
         for (int color=0; color<3; color++){
-                               printf ("%s \n", fxn);
-
             for (int arg=2; arg<=4; arg++){
-            rgbdiffuse[color]=atof(argv[arg]);
+            kd[color]=atof(argv[arg]);
             arg++;
         }
         }
@@ -369,7 +362,7 @@ int i;
 
         for (int color=0; color<3; color++){
             for (int arg=2; arg<=4; arg++){
-            rgbspec[color]=atof(argv[arg]);
+            ks[color]=atof(argv[arg]);
             arg++;
         }
         }
@@ -382,9 +375,13 @@ int i;
     else if (strcmp(fxn, "-dl") == 0) {
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
-                           printf ("%s \n", fxn);
 
           for (int adddl=0; adddl<6; adddl++){
+       //   printf ("%s \n", argv[a+1+adddl]);
+       //   printf ("%d \n", dlcount);
+       //   printf ("%d \n", adddl);
+
+
           dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
         }
         dlcount++;

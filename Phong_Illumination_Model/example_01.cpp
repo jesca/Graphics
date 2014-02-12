@@ -139,7 +139,6 @@ void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
     
 }
 
-<<<<<<< HEAD
  
 
 
@@ -150,8 +149,8 @@ void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
        spec->x = ks.x*I.x * pow(max(rDotv,0.0f),spec_coeff);
        spec->y = ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
        spec->z = ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
-
-=======
+}
+/*
 // Specular
 void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v, float p) {
     float rDotv = dot(r, v);
@@ -159,8 +158,7 @@ void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v, float p) {
     specPart->x = fmax(ks.x * I.x * rDotvP, 0);
     specPart->y = fmax(ks.y * I.y * rDotvP, 0);
     specPart->z = fmax(ks.z * I.z * rDotvP, 0);
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
-}
+}*/
 
 
 void circle(float centerX, float centerY, float radius) {
@@ -192,13 +190,9 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
-<<<<<<< HEAD
             Vec3 dl_I;   
             Vec3 dl_L;  
-=======
-            Vec3 dl_I;
-            Vec3 dl_L;
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
+
             Vec3 pl_I;
             Vec3 pl_L;
             
@@ -207,13 +201,8 @@ void circle(float centerX, float centerY, float radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
                 Vec3 n = {x,y,z};
-<<<<<<< HEAD
                 normalize(&n);  //normalizes vector
-                
-                
-=======
-                normalize(&n);
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
+
                 
                 for (int m = 0; m<dlcount; m++) {
                     //I = intensity r g b
@@ -221,22 +210,16 @@ void circle(float centerX, float centerY, float radius) {
                     dl_I.y =dl_array[m][4];
                     dl_I.z =dl_array[m][5];
                     //L = direction xyz
-<<<<<<< HEAD
                     dl_L.x= -dl_array[m][0];//direction
                     dl_L.y= -dl_array[m][1];
                     dl_L.z= -dl_array[m][2];
-=======
                     dl_L.x= dl_array[m][0];//direction
                     dl_L.y= dl_array[m][1];
                     dl_L.z= dl_array[m][2];
                     
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
                     normalize(&dl_L);
-                    diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
 
-                    
-                    
-<<<<<<< HEAD
+                
                     
                     //diffuse reflection
                     float tempdot = dl_L.z * n.x + dl_L.y * n.y + n.z * dl_L.z;
@@ -249,30 +232,13 @@ void circle(float centerX, float centerY, float radius) {
                  //   printf ("%s %f \n", " gspec: ", final_rgb_specular.y);
 
                 //    final_rgb_specular.z+=ks.z*dl_array[m][5]*max(tempdot,0.0f);
-                    
-                    diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
-
-                   
 
                 }
                 
                 
-                for (int m = 0; m < plcount; m++)
-                {
-                  
-                    //I r g b
-                    pl_I.x =pl_array[m][3];
-                    pl_I.y =pl_array[m][4];
-                    pl_I.z =pl_array[m][5];
-                    //dir x y z 
-                    pl_L.x= (pl_array[m][0]);//direction
-                    pl_L.y= (pl_array[m][1]);
-                    pl_L.z= (pl_array[m][2]);
-                    normalize(&pl_L);
-                 
-                    float pldotn =dot(n,pl_L);
-=======
-                }
+           
+                
+                
                 for (int m = 0; m<plcount; m++) {
                     //I = intensity r g b
                     pl_I.x =pl_array[m][3];
@@ -284,17 +250,15 @@ void circle(float centerX, float centerY, float radius) {
                     pl_L.z= pl_array[m][2];
                     
                     normalize(&pl_L);
-                    diffuse(&final_rgb_diffuse, pl_I, pl_L, n);
-                    
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
-                    
-                    //r=d-2(d*nnorm)norm -- REFLECTION will be passed back to pl_L to spec function
-                    float rx = -pl_L.x + 2*(pldotn)*n.x;
-                    float ry = -pl_L.y + 2*(pldotn)*n.y;
-                    float rz = -pl_L.z + 2*(pldotn)*n.z;
-                    pl_L.x=rx;
-                    pl_L.y=ry;
-                    pl_L.z=rz;
+                                        
+                    //r=d-2(d*nnorm)norm
+                    float pldotn=dot(pl_L, n);
+                    float refx = -pl_L.x + 2*(pldotn)*n.x;
+                    float refy = -pl_L.y + 2*(pldotn)*n.y;
+                    float refz = -pl_L.z + 2*(pldotn)*n.z;
+                    pl_L.x=refx;
+                    pl_L.y=refy;
+                    pl_L.z=refz;
                     
                     // final_rgb_diffuse.x+=kd.x*pl_array[m][3]*max(pldotn,0.0f);
                    // final_rgb_diffuse.y+=kd.y*pl_array[m][4]*max(pldotn,0.0f);
@@ -307,7 +271,6 @@ void circle(float centerX, float centerY, float radius) {
 
                 
                 
-<<<<<<< HEAD
             
             spec(&final_rgb_specular, pl_I,pl_L,view);
             diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
@@ -319,22 +282,16 @@ void circle(float centerX, float centerY, float radius) {
             final_rgb.z = final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
             setPixel(i,j, final_rgb_specular.x, final_rgb_specular.y, final_rgb_specular.z);
 
-               // printf ("%s %f \n", "r spec final ", final_rgb.x);
-                 //     printf ("%s %f \n", " g final: ", final_rgb.y);
-=======
-//                printf("x = %f \n", final_rgb_diffuse.x);
-//                printf("y = %f \n", final_rgb_diffuse.y);
-//                printf("z = %f \n", final_rgb_diffuse.z);
+
             
                 
             final_rgb.x += final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
             final_rgb.y += final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
             final_rgb.z += final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
                 
-            setPixel(i,j, final_rgb_diffuse.x, final_rgb_diffuse.y, final_rgb_diffuse.z);
+            setPixel(i,j, final_rgb_specular.x, final_rgb_specular.y, final_rgb_specular.z);
 
                 
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
                 
                 // This is amusing, but it assumes negative color values are treated reasonably.
                 // setPixel(i,j, x/radius, y/radius, z/radius );
@@ -434,13 +391,10 @@ int main(int argc, char *argv[]) {
         
         //-pl x y z r g b
         else if (strcmp(fxn, "-pl") == 0) {
-<<<<<<< HEAD
-=======
-            // for (int pl=0, pl<5;pl++) {
+             // for (int pl=0, pl<5;pl++) {
             // if plcount[pl]==false {
             printf("a = %d\n", a);
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
-            for (int addpl=0; addpl<6; addpl++){
+             for (int addpl=0; addpl<6; addpl++){
                 pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
             }
             plcount++;
@@ -464,9 +418,6 @@ int main(int argc, char *argv[]) {
     }
     
     
-<<<<<<< HEAD
- 
-=======
     // testing functions here
     Vec3 test1 = {3, 4, 2};
     Vec3 test2 = {1, 2, 3};
@@ -490,10 +441,8 @@ int main(int argc, char *argv[]) {
     printf("%f, \n", test3.x);
     printf("%f, \n", test3.y);
     printf("%f, \n", test3.z);
-    
-    
->>>>>>> 5b6a1f474458b07ae3486b383033174ec4c3eeaf
-    
+ 
+     
     
     // Initalize theviewport size
     viewport.w = 400;

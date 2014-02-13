@@ -255,7 +255,6 @@ void circle(float centerX, float centerY, float radius) {
                     pl_I.z =pl_array[m][5];
                     
                     normalize(&pl_L);
-                    diffuse(&final_rgb_diffuse, pl_I,pl_L,view);
 
                     //r=d-2(d*nnorm)norm
                     float pldotn=dot(pl_L, n);
@@ -267,14 +266,16 @@ void circle(float centerX, float centerY, float radius) {
                     pl_ref.z=refz;
 
                     spec(&final_rgb_specular, pl_I,pl_ref,view);
-                    
+                    diffuse(&final_rgb_diffuse, pl_I,pl_L,n);
+
                     
      
                     
 
                 }
-                
+            
             setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
+       //          setPixel(i,j, final_rgb_specular.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_diffuse.z);
 
             }
             

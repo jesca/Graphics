@@ -62,7 +62,7 @@ float dl_array[5][6];
 float spec_coeff=0;
 Vec3 rgb;
 
-Vec3 ka = {0.0,0.0,0.0};
+Vec3 ka = {0,0,0};
 Vec3 kd = {0.0,0.0,0.0};
 Vec3 ks = {0.0,0.0,0.0};
 Vec3 view={0.0,0.0,1.0};
@@ -145,9 +145,9 @@ void normalize(Vec3* vec) {
 // Diffuse
 void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
     float lDotn = dot(l, n);
-    diffusePart->x = fmax(kd.x * I.x * lDotn, 0.0f);
-    diffusePart->y = fmax(kd.y * I.y * lDotn, 0.0f);
-    diffusePart->z = fmax(kd.z * I.z * lDotn, 0.0f);
+    diffusePart->x += kd.x * I.x * fmax(lDotn, 0.0f);
+    diffusePart->y +=  kd.y * I.y * fmax(lDotn, 0.0f);
+    diffusePart->z += kd.z * I.z * fmax(lDotn, 0.0f);
     
 }
 
@@ -158,9 +158,9 @@ void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
 void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
     //    printf("dot %f\n", kd.y);
     float rDotv=dot(r,v);
-       spec->x = ks.x*I.x * pow(max(rDotv,0.0f),spec_coeff);
-       spec->y = ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
-       spec->z = ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
+       spec->x += ks.x*I.x * pow(max(rDotv,0.0f),spec_coeff);
+       spec->y += ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
+       spec->z += ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
 }
 
 /*
@@ -181,33 +181,31 @@ void circle(float centerX, float centerY, float radius) {
     // inside the sphere's radius.  But the example is more clear this
     // way.  In general drawing an object by loopig over the whole
     // screen is wasteful.
-    
+    Vec3 final_rgb_ambience ={0,0,0};
+
     int i,j;  // Pixel indices
     int minI = max(0,(int)floor(centerX-radius));
     int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
-    
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-    
-    Vec3 final_rgb_diffuse = {0.0,0.0,0.0};
-    Vec3 final_rgb_ambience ={0.0,0.0,0.0};
-    Vec3 final_rgb_specular = {0.0,0.0,0.0};
+
  
     
 //add to ambient term
-     for (int i = 0; i < plcount; i ++)
-     {
-     final_rgb_ambience.x += ka.x * .3*(pl_array[i][3]);
-     final_rgb_ambience.y += ka.y * .3*(pl_array[i][4]);
-     final_rgb_ambience.z += ka.z * .3*(pl_array[i][5]);
-     }
-     
-     for (int i = 0; i < dlcount; i ++)
-     {
-     final_rgb_ambience.x += kd.x * .3*(dl_array[i][3]);
-     final_rgb_ambience.y += kd.y * .3*(dl_array[i][4]);
-     final_rgb_ambience.z += kd.z * .3*(dl_array[i][5]);
-     }
+    
+    for (int i = 0; i < plcount; i ++)
+    {
+        final_rgb_ambience.x += ka.x * (pl_array[i][3]);
+        final_rgb_ambience.y += ka.y * (pl_array[i][4]);
+        final_rgb_ambience.z += ka.z * (pl_array[i][5]);
+    }
+    
+    for (int i = 0; i < dlcount; i ++)
+    {
+        final_rgb_ambience.x += ka.x * (dl_array[i][3]);
+        final_rgb_ambience.y += ka.y * (dl_array[i][4]);
+        final_rgb_ambience.z += ka.z * (dl_array[i][5]);
+    }
     
     for (i=0;i<viewport.w;i++) {
         for (j=0;j<viewport.h;j++) {
@@ -217,11 +215,14 @@ void circle(float centerX, float centerY, float radius) {
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
             Vec3 dl_I;   
-            Vec3 dl_L;  
+            Vec3 dl_L;
             Vec3 dl_ref;
             Vec3 pl_I;
             Vec3 pl_L;
             Vec3 pl_ref;
+            
+            Vec3 final_rgb_diffuse = {0.0,0.0,0.0};
+             Vec3 final_rgb_specular = {0.0,0.0,0.0};
              
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
@@ -242,10 +243,17 @@ void circle(float centerX, float centerY, float radius) {
 
                     
                     normalize(&dl_L);
+                    float dldotn=dot(dl_L, n);
 
+                    float refx = -dl_L.x + 2*(dldotn)*n.x;
+                    float refy = -dl_L.y + 2*(dldotn)*n.y;
+                    float refz = -dl_L.z + 2*(dldotn)*n.z;
+                    dl_ref.x=refx;
+                    dl_ref.y=refy;
+                    dl_ref.z=refz;
                     //diffuse reflection
                     diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
-
+                    spec(&final_rgb_specular, dl_I,dl_ref,view);
 
                 }
 
@@ -276,8 +284,8 @@ void circle(float centerX, float centerY, float radius) {
                     diffuse(&final_rgb_diffuse, pl_I,pl_L,n);
                 }
             
-            setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
-       //          setPixel(i,j, final_rgb_specular.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_diffuse.z);
+          //  setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
+                setPixel(i,j, final_rgb_diffuse.x +final_rgb_specular.x+final_rgb_ambience.x, final_rgb_diffuse.y +final_rgb_specular.y+final_rgb_ambience.y, final_rgb_diffuse.z  +final_rgb_ambience.z);
 
             }
             

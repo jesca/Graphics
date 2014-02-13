@@ -69,6 +69,19 @@ Vec3 view={0.0,0.0,1.0};
 
 
 //****************************************************
+// Spacebar Exit
+//****************************************************
+
+//http://stackoverflow.com/questions/6880863/keyboard-event-in-opengl-with-glut
+void handleSpacebar(unsigned char key, int x, int y)
+{
+    if (key == 32)
+    {
+        exit(0);
+    }
+}
+
+//****************************************************
 // Simple init function
 //****************************************************
 void initScene(){
@@ -150,14 +163,15 @@ void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
        spec->z = ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
 }
 
+/*
 // Specular
 void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v) {
     float rDotv = dot(r, v);
     float rDotvP = pow(rDotv, spec_coeff);
-    specPart->x = fmax(ks.x * I.x * rDotvP, 0.0);
-    specPart->y = fmax(ks.y * I.y * rDotvP, 0.0);
-    specPart->z = fmax(ks.z * I.z * rDotvP, 0.0);
-}
+    specPart->x += fmax(ks.x * I.x * rDotvP, 0.0);
+    specPart->y += fmax(ks.y * I.y * rDotvP, 0.0);
+    specPart->z += fmax(ks.z * I.z * rDotvP, 0.0);
+}*/
 
 
 void circle(float centerX, float centerY, float radius) {
@@ -180,19 +194,19 @@ void circle(float centerX, float centerY, float radius) {
     Vec3 final_rgb_specular = {0.0,0.0,0.0};
  
     
-
+//add to ambient term
      for (int i = 0; i < plcount; i ++)
      {
-     final_rgb_ambience.x += ka.x * pl_array[i][3];
-     final_rgb_ambience.y += ka.y * pl_array[i][4];
-     final_rgb_ambience.z += ka.z * pl_array[i][5];
+     final_rgb_ambience.x += ka.x * .3*(pl_array[i][3]);
+     final_rgb_ambience.y += ka.y * .3*(pl_array[i][4]);
+     final_rgb_ambience.z += ka.z * .3*(pl_array[i][5]);
      }
      
      for (int i = 0; i < dlcount; i ++)
      {
-     final_rgb_ambience.x += ka.x * dl_array[i][3];
-     final_rgb_ambience.y += ka.y * dl_array[i][4];
-     final_rgb_ambience.z += ka.z * dl_array[i][5];
+     final_rgb_ambience.x += kd.x * .3*(dl_array[i][3]);
+     final_rgb_ambience.y += kd.y * .3*(dl_array[i][4]);
+     final_rgb_ambience.z += kd.z * .3*(dl_array[i][5]);
      }
     
     for (i=0;i<viewport.w;i++) {
@@ -208,8 +222,6 @@ void circle(float centerX, float centerY, float radius) {
             Vec3 pl_I;
             Vec3 pl_L;
             Vec3 pl_ref;
-            
-            
              
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
@@ -232,10 +244,6 @@ void circle(float centerX, float centerY, float radius) {
                     normalize(&dl_L);
 
                     //diffuse reflection
-                    float tempdot = dl_L.z * n.x + dl_L.y * n.y + n.z * dl_L.z;
-                    float rx = dl_L.x + 2*(tempdot)*n.x;
-                    float ry = dl_L.y + 2*(tempdot)*n.y;
-                    float rz = dl_L.z + 2*(tempdot)*n.z;
                     diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
 
 
@@ -264,14 +272,8 @@ void circle(float centerX, float centerY, float radius) {
                     pl_ref.x=refx;
                     pl_ref.y=refy;
                     pl_ref.z=refz;
-
                     spec(&final_rgb_specular, pl_I,pl_ref,view);
                     diffuse(&final_rgb_diffuse, pl_I,pl_L,n);
-
-                    
-     
-                    
-
                 }
             
             setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
@@ -285,6 +287,7 @@ void circle(float centerX, float centerY, float radius) {
     
     
     glEnd();
+    
 }
 
 
@@ -315,7 +318,8 @@ void myDisplay() {
 // the usual stuff, nothing exciting here
 //****************************************************
  
-    
+
+
     
  
     int main(int argc, char *argv[]) {
@@ -406,6 +410,7 @@ void myDisplay() {
     viewport.w = 400;
     viewport.h = 400;
     
+
     //The size and position of the window
     glutInitWindowSize(viewport.w, viewport.h);
     glutInitWindowPosition(0,0);
@@ -415,10 +420,12 @@ void myDisplay() {
     
     glutDisplayFunc(myDisplay);               // function to run when its time to draw something
     glutReshapeFunc(myReshape);               // function to run when the window gets resized
-    
+        
+        //exit on spacebar
+        glutKeyboardFunc(handleSpacebar);
     glutMainLoop();                           // infinite loop that will keep drawing and resizing
     // and whatever else
-    
+
     return 0;
 }
 

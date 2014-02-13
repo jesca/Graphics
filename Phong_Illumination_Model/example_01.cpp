@@ -59,14 +59,13 @@ int plcount=0;
 int dlcount=0;
 float pl_array[5][6];
 float dl_array[5][6];
-float spec_coeff;
+float spec_coeff=0;
 Vec3 rgb;
 
-// float ambiencergb[3]={0,0,0};
-Vec3 ka = {0,0,0};
-Vec3 kd = {0,0,0};
-Vec3 ks = {0,0,0};
-Vec3 view={0,0,1};
+Vec3 ka = {0.0,0.0,0.0};
+Vec3 kd = {0.0,0.0,0.0};
+Vec3 ks = {0.0,0.0,0.0};
+Vec3 view={0.0,0.0,1.0};
 
 
 //****************************************************
@@ -119,7 +118,7 @@ float dot(Vec3 a, Vec3 b) {
 
 // Norm (Vector length)
 float norm(Vec3 vec) {
-    return sqrt(dot(vec, vec));
+    return sqrt(sqr(vec.x)+sqr(vec.y)+sqr(vec.z));
 }
 
 // Normalize
@@ -133,9 +132,9 @@ void normalize(Vec3* vec) {
 // Diffuse
 void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
     float lDotn = dot(l, n);
-    diffusePart->x = fmax(kd.x * I.x * lDotn, 0);
-    diffusePart->y = fmax(kd.y * I.y * lDotn, 0);
-    diffusePart->z = fmax(kd.z * I.z * lDotn, 0);
+    diffusePart->x = fmax(kd.x * I.x * lDotn, 0.0f);
+    diffusePart->y = fmax(kd.y * I.y * lDotn, 0.0f);
+    diffusePart->z = fmax(kd.z * I.z * lDotn, 0.0f);
     
 }
 
@@ -155,9 +154,9 @@ void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
 void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v) {
     float rDotv = dot(r, v);
     float rDotvP = pow(rDotv, spec_coeff);
-    specPart->x = fmax(ks.x * I.x * rDotvP, 0);
-    specPart->y = fmax(ks.y * I.y * rDotvP, 0);
-    specPart->z = fmax(ks.z * I.z * rDotvP, 0);
+    specPart->x = fmax(ks.x * I.x * rDotvP, 0.0);
+    specPart->y = fmax(ks.y * I.y * rDotvP, 0.0);
+    specPart->z = fmax(ks.z * I.z * rDotvP, 0.0);
 }
 
 
@@ -176,12 +175,25 @@ void circle(float centerX, float centerY, float radius) {
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
     
-    Vec3 final_rgb_diffuse = {0,0,0};
-    Vec3 final_rgb_ambience = ka;
-    Vec3 final_rgb_specular = {0,0,0};;
-    Vec3 final_rgb = {0,0,0};
-
+    Vec3 final_rgb_diffuse = {0.0,0.0,0.0};
+    Vec3 final_rgb_ambience ={0.0,0.0,0.0};
+    Vec3 final_rgb_specular = {0.0,0.0,0.0};
+ 
     
+
+     for (int i = 0; i < plcount; i ++)
+     {
+     final_rgb_ambience.x += ka.x * pl_array[i][3];
+     final_rgb_ambience.y += ka.y * pl_array[i][4];
+     final_rgb_ambience.z += ka.z * pl_array[i][5];
+     }
+     
+     for (int i = 0; i < dlcount; i ++)
+     {
+     final_rgb_ambience.x += ka.x * dl_array[i][3];
+     final_rgb_ambience.y += ka.y * dl_array[i][4];
+     final_rgb_ambience.z += ka.z * dl_array[i][5];
+     }
     
     for (i=0;i<viewport.w;i++) {
         for (j=0;j<viewport.h;j++) {
@@ -192,9 +204,11 @@ void circle(float centerX, float centerY, float radius) {
             float dist = sqrt(sqr(x) + sqr(y));
             Vec3 dl_I;   
             Vec3 dl_L;  
-
+            Vec3 dl_ref;
             Vec3 pl_I;
             Vec3 pl_L;
+            Vec3 pl_ref;
+            
             
              
             if (dist<=radius) {
@@ -213,9 +227,7 @@ void circle(float centerX, float centerY, float radius) {
                     dl_L.x= -dl_array[m][0];//direction
                     dl_L.y= -dl_array[m][1];
                     dl_L.z= -dl_array[m][2];
-                    dl_L.x= dl_array[m][0];//direction
-                    dl_L.y= dl_array[m][1];
-                    dl_L.z= dl_array[m][2];
+
                     
                     normalize(&dl_L);
 
@@ -224,55 +236,46 @@ void circle(float centerX, float centerY, float radius) {
                     float rx = dl_L.x + 2*(tempdot)*n.x;
                     float ry = dl_L.y + 2*(tempdot)*n.y;
                     float rz = dl_L.z + 2*(tempdot)*n.z;
+                    diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
+
 
                 }
-                
-                
-           
-                
-                
+
                 for (int m = 0; m<plcount; m++) {
+
+                    //L = direction xyz
+                    pl_L.x= pl_array[m][0]*radius-x;
+               //     printf ("%s %f \n", "r in I ", pl_L.x);
+
+                    pl_L.y= pl_array[m][1]*radius-y;
+                    pl_L.z= pl_array[m][2]*radius-z;
                     //I = intensity r g b
                     pl_I.x =pl_array[m][3];
                     pl_I.y =pl_array[m][4];
                     pl_I.z =pl_array[m][5];
-                    //L = direction xyz
-                    pl_L.x= pl_array[m][0]; 
-                    pl_L.y= pl_array[m][1];
-                    pl_L.z= pl_array[m][2];
                     
                     normalize(&pl_L);
-                                        
+                    diffuse(&final_rgb_diffuse, pl_I,pl_L,view);
+
                     //r=d-2(d*nnorm)norm
                     float pldotn=dot(pl_L, n);
                     float refx = -pl_L.x + 2*(pldotn)*n.x;
                     float refy = -pl_L.y + 2*(pldotn)*n.y;
                     float refz = -pl_L.z + 2*(pldotn)*n.z;
-                    pl_L.x=refx;
-                    pl_L.y=refy;
-                    pl_L.z=refz;
-                  
-//                   spec(&final_rgb_specular, pl_I,pl_L,view);
+                    pl_ref.x=refx;
+                    pl_ref.y=refy;
+                    pl_ref.z=refz;
+
+                    spec(&final_rgb_specular, pl_I,pl_ref,view);
+                    
+                    
+     
+                    
 
                 }
+                
+            setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
 
-
-            spec(&final_rgb_specular, pl_I,pl_L,view);
-            diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
- 
-        //        printf ("%s %f \n", "r spec final ", final_rgb_specular.x);
-        //        printf ("%s %f \n", " g spec: ", final_rgb_specular.y);
-                
-            final_rgb.x += final_rgb_diffuse.x + final_rgb_ambience.x + final_rgb_specular.x;
-            final_rgb.y += final_rgb_diffuse.y + final_rgb_ambience.y + final_rgb_specular.y;
-            final_rgb.z += final_rgb_diffuse.z + final_rgb_ambience.z + final_rgb_specular.z;
-                
-            setPixel(i,j, final_rgb_specular.x, final_rgb_specular.y, final_rgb_specular.z);
-
-                
-                
-                // This is amusing, but it assumes negative color values are treated reasonably.
-                // setPixel(i,j, x/radius, y/radius, z/radius );
             }
             
             
@@ -311,82 +314,65 @@ void myDisplay() {
 // the usual stuff, nothing exciting here
 //****************************************************
  
-int main(int argc, char *argv[]) {
     
     
+ 
+    int main(int argc, char *argv[]) {
+        
+        for (int i = 1; i < argc; i ++)
+        {
+            if (strcmp(argv[i], "-ka") == 0)
+            {
+                ka.x = atof(argv[i+1]);
+                ka.y = atof(argv[i+2]);
+                ka.z = atof(argv[i+3]);
+            }
+            
+            else if (strcmp(argv[i], "-kd") == 0)
+            {
+                kd.x = atof(argv[i+1]);
+                kd.y = atof(argv[i+2]);
+                kd.z = atof(argv[i+3]);
+            }
+            
+            else if (strcmp(argv[i], "-ks") == 0)
+            {
+                ks.x = atof(argv[i+1]);
+                ks.y = atof(argv[i+2]);
+                ks.z = atof(argv[i+3]);
+            }
+            
+            else if (strcmp(argv[i], "-dl") == 0)
+            {
+                for(int m = 0; m < 6; m++)
+                {
+                    dl_array[dlcount][m] = atof(argv[i + 1 + m]);
+                }
+                dlcount++;
+                
+            }
+            else if (strcmp(argv[i], "-sp") == 0)
+            {
+                spec_coeff = atof(argv[i+1]);
+
+            }
+            
+            else if (strcmp(argv[i], "-pl") == 0)
+            {
+                for(int m= 0; m < 6; m++)
+                {
+                    pl_array[plcount][m] = atof(argv[i + 1 + m]);
+                }
+                plcount++;
+            }
+            
+          
+        }
     //This initializes glut
     glutInit(&argc, argv);
     
     //This tells glut to use a double-buffered window with red, green, and blue channels
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
- 
-    
-    for (int a=1; a<argc;) {
-        const char *fxn=argv[a];
-        printf("%s \n", fxn);
-        //ambient; -kx r g b
-        if ((strcmp(fxn, "-ka") == 0)) {
-            ka.x=atof(argv[2]);
-            ka.y=atof(argv[3]);
-            ka.z=atof(argv[4]);
-            a+=4;
-        }
-        
-        else if ((strcmp(fxn, "-kd") == 0)) {
-            kd.x=atof(argv[2]);
-            kd.y=atof(argv[3]);
-            kd.z=atof(argv[4]);
-            a+=4;
-        }
-        
-        else if ((strcmp(fxn, "-ks") == 0)) {
-            printf ("%s \n", fxn);
-            
-            ks.x=atof(argv[2]);
-            ks.y=atof(argv[3]);
-            ks.z=atof(argv[4]);
-            a+=4;
-        }
-        
-        
-  
-        else if (strcmp(fxn, "-dl") == 0) {
-            
-            for (int adddl=0; adddl<6; adddl++){
-                dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
-            }
-            dlcount++;
-            a+=7;
-            
-        }
-        
-        //-pl x y z r g b
-        else if (strcmp(fxn, "-pl") == 0) {
-             // for (int pl=0, pl<5;pl++) {
-            // if plcount[pl]==false {
-            printf("a = %d\n", a);
-             for (int addpl=0; addpl<6; addpl++){
-                pl_array[plcount][addpl]=atof(argv[a+1+addpl]);
-            }
-            plcount++;
-            
-            a+=7;
-            
-        }
-        
-        
-        //specular: -sp v
-        else if ((strcmp(fxn,"-sp"))) {
-            spec_coeff=atof(argv[a+1]);
-            a+=2;
-        }
-        //don't get rid of this..without this it runs out of bounds and seg faults
-        else if ((strcmp(fxn,"-none"))) {
-            spec_coeff=atof(argv[a+1]);
-            a+=2;
-        }
-        
-    }
     
     
     // testing functions here

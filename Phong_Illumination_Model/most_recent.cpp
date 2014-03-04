@@ -59,9 +59,11 @@ Viewport    viewport;
     float rgb[3];
 
    // float ambiencergb[3]={0,0,0};
-    float ka[]={0,0,0};
+    float ka[3]={0,0,0};
     float kd[3]={0,0,0};
     float ks[3]={0,0,0};
+    float viewx = 0.0, viewy = 0.0, viewz = 1.0;
+
 
 
 //****************************************************
@@ -177,25 +179,23 @@ void circle(float centerX, float centerY, float radius) {
     
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
-        
-    float final_rgb_diffuse[3];
-    float final_rgb_ambience[3];
-    float final_rgb_specular[3];
-    float final_rgb[3];
-
+ 
+ 
+ 
     //AMBIANCE
     // ka * I ... ka=.1kd
      if (dlcount>1) {
             for (int k = 0; k < dlcount; k++)
              {
 
-             final_rgb_ambience[1] += ka[0] * (dl_array[k][3]);
-             final_rgb_ambience[2] += ka[1] * (dl_array[k][4]);
-             final_rgb_ambience[3] += ka[2] *(dl_array[k][5]);
+             final_rgb_ambience[0] += ka[0] * (dl_array[k][3]);
+             final_rgb_ambience[1] += ka[1] * (dl_array[k][4]);
+             final_rgb_ambience[2] += ka[2] *(dl_array[k][5]);
             }
            
     }
 
+ 
 
     for (i=0;i<viewport.w;i++) {
         for (j=0;j<viewport.h;j++) {
@@ -204,23 +204,85 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
+            float final_rgb_diffuse[3];
+
+    float final_rgb_ambience[3];
+    float final_rgb_specular[3];
+
             float dl_I[3];
             float dl_L[3];
-            float final_rgb_diffuse[3];
             float dn_dotproduct;
+  
 
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
                 float xyz[3]={x,y,z};
                 normalize(3,xyz);
+                            float length = sqrt(sqr(x) + sqr(y) + sqr(z));
 
-            
-                    for (int m = 0; m<dlcount; m++) {
+            float normalx = x/length;
+                float normaly = y/length;
+                float normalz = z/length;
+/*
+                float normalx = x/length;
+                float normaly = y/length;
+                float normalz = z/length;
+                
+                for (int ctr = 0; ctr < numpointlights; ctr ++)
+                {
+                    float lightx = (pointlight[ctr][0]*radius - x);
+                    float lighty = (pointlight[ctr][1]*radius - y);
+                    float lightz = (pointlight[ctr][2]*radius - z);
+                    float lightlength = sqrt(sqr(lightx) + sqr(lighty) + sqr(lightz));
+                    lightx /= lightlength;
+                    lighty /= lightlength;
+                    lightz /= lightlength;
+                    float dotproduct = lightx * normalx + lighty * normaly + lightz * normalz;
+                    float reflectedx = -lightx + 2*(dotproduct)*normalx;
+                    float reflectedy = -lighty + 2*(dotproduct)*normaly;
+                    float reflectedz = -lightz + 2*(dotproduct)*normalz;
+                    
+                    
+                    totaldiffuser += diffred * pointlight[ctr][3] * max(dotproduct, 0.0f);
+                    totaldiffuseg += diffgreen * pointlight[ctr][4] * max(dotproduct, 0.0f);
+                    totaldiffuseb += diffblue * pointlight[ctr][5] * max(dotproduct, 0.0f);
+                    
+                    
+                    dotproduct = reflectedx * viewx + reflectedy * viewy + reflectedz * viewz;
+                    totalspecr += specred * pointlight[ctr][3] * pow(max(dotproduct, 0.0f), specpower);
+                    totalspecg += specgreen * pointlight[ctr][4] * pow(max(dotproduct, 0.0f), specpower);
+                    totalspecb += specblue * pointlight[ctr][5] * pow(max(dotproduct, 0.0f), specpower);
+                }
+                
+                for (int ctr = 0; ctr < numdirectionallights; ctr ++)
+                {
+                    float lightx = -directionallight[ctr][0];
+                    float lighty = -directionallight[ctr][1];
+                    float lightz = -directionallight[ctr][2];
+                    float lightlength = sqrt(sqr(lightx) + sqr(lighty) + sqr(lightz));
+                    lightx /= lightlength;
+                    lighty /= lightlength;
+                    lightz /= lightlength;
+                    float dotproduct = lightx * normalx + lighty * normaly + lightz * normalz;
+                    float reflectedx = -lightx + 2*(dotproduct)*normalx;
+                    float reflectedy = -lighty + 2*(dotproduct)*normaly;
+                    float reflectedz = -lightz + 2*(dotproduct)*normalz;
+                    totaldiffuser += diffred * directionallight[ctr][3] * max(dotproduct, 0.0f);
+                    totaldiffuseg += diffgreen * directionallight[ctr][4] * max(dotproduct, 0.0f);
+                    totaldiffuseb += diffblue * directionallight[ctr][5] * max(dotproduct, 0.0f);
+                    dotproduct = reflectedx * viewx + reflectedy * viewy + reflectedz * viewz;
+                    totalspecr += specred * directionallight[ctr][3] * pow(max(dotproduct, 0.0f), specpower);
+                    totalspecg += specgreen * directionallight[ctr][4] * pow(max(dotproduct, 0.0f), specpower);
+                    totalspecb += specblue * directionallight[ctr][5] * pow(max(dotproduct, 0.0f), specpower);
+                }*/
+
+                      for (int m = 0; m<dlcount; m++) {
                             //I = intensity r g b
-                            dl_I[0]+=dl_array[m][3];
-                            dl_I[1]+=dl_array[m][4];
-                            dl_I[2]+=dl_array[m][5];
+                          
+                            dl_I[0]=dl_array[m][3];
+                            dl_I[1]=dl_array[m][4];
+                            dl_I[2]=dl_array[m][5];
                         //L = direction xyz
                             dl_L[0]=-dl_array[m][0];//direction 
                             dl_L[1]=-dl_array[m][1];
@@ -229,20 +291,52 @@ void circle(float centerX, float centerY, float radius) {
 
                             //should already be normalized
                             dn_dotproduct=dot(3, dl_L,xyz);
-                            for (int i=0; i<3; i++) {
-                                final_rgb_diffuse[i]+=(kd[i]*dl_I[i]*max(dn_dotproduct,0.0f));
-                            }
+                      //    printf ("%s %f \n", "dotproduct: ", dn_dotproduct);
+                            final_rgb_diffuse[0]+=(kd[0]*dl_I[0]*max(dn_dotproduct,0.0f));
+                            final_rgb_diffuse[1]+=(kd[1]*dl_I[1]*max(dn_dotproduct,0.0f));
+                            final_rgb_diffuse[2]+=(kd[2]*dl_I[2]*max(dn_dotproduct,0.0f));
+
                     }
+                      printf ("%s %f \n", "total dif r: ", final_rgb_diffuse[0]);
+                  printf ("%s %f \n", "total d g: ", final_rgb_diffuse[1]);
+
+                  printf ("%s %f \n", "total d b: ", final_rgb_diffuse[2]);
                 
-
-
-                for (int x=0; x<3; x++) {
-                    final_rgb[x]+=final_rgb_diffuse[x]+final_rgb_ambience[x]+final_rgb_specular[x];
+        for (int ctr = 0; ctr < plcount; ctr ++)
+                {
+                    float lightx = (pl_array[ctr][0]*radius - x);
+                    float lighty = (pl_array[ctr][1]*radius - y);
+                    float lightz = (pl_array[ctr][2]*radius - z);
+                    float lightlength = sqrt(sqr(lightx) + sqr(lighty) + sqr(lightz));
+                    lightx /= lightlength;
+                    lighty /= lightlength;
+                    lightz /= lightlength;
+                    float dotproduct = lightx * normalx + lighty * normaly + lightz * normalz;
+                    float reflectedx = -lightx + 2*(dotproduct)*normalx;
+                    float reflectedy = -lighty + 2*(dotproduct)*normaly;
+                    float reflectedz = -lightz + 2*(dotproduct)*normalz;
+                    
+                    
+                  //  final_rgb_diffuse[0] += (kd[0] * pl_array[ctr][3] * max(dotproduct, 0.0f));
+                  //  final_rgb_diffuse[1] += kd[1] * pl_array[ctr][4] * max(dotproduct, 0.0f);
+                  //  final_rgb_diffuse[2] += kd[2] * pl_array[ctr][5] * max(dotproduct, 0.0f);
+                    
+                    
+                    dotproduct = reflectedx * viewx + reflectedy * viewy + reflectedz * viewz;
+                    final_rgb_specular[0] += ks[0] * pl_array[ctr][3] * pow(max(dotproduct, 0.0f), spec_coeff);
+                    final_rgb_specular[1] += ks[1] * pl_array[ctr][4] * pow(max(dotproduct, 0.0f), spec_coeff);
+                    final_rgb_specular[2] += ks[2] * pl_array[ctr][5] * pow(max(dotproduct, 0.0f), spec_coeff);
                 }
-                
+  
+ 
+                     printf ("%s %f \n", "total spec r: ", final_rgb_specular[0]);
+                  printf ("%s %f \n", "total spec g: ", final_rgb_specular[1]);
 
-                setPixel(i,j, final_rgb[0], final_rgb[1], final_rgb[2]);
-                
+                  printf ("%s %f \n", "total spec b: ", final_rgb_specular[2]);
+                  
+
+                setPixel(i,j, final_rgb_diffuse[0]+final_rgb_specular[0], final_rgb_diffuse[1]+final_rgb_specular[1],final_rgb_diffuse[2]+final_rgb_specular[2]);
+            
 
                 // This is amusing, but it assumes negative color values are treated reasonably.
                 // setPixel(i,j, x/radius, y/radius, z/radius );
@@ -316,72 +410,46 @@ points in. The r g b values are it's color. See -pl for coordinate system notes
 
 int main(int argc, char *argv[]) {
 
-    
-  //This initializes glut
-  glutInit(&argc, argv);
-  
-  //This tells glut to use a double-buffered window with red, green, and blue channels 
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-/*
-int i;
-  for (i=1; i<= 3; i++) {
-    printf("\narg%d=%s", i, argv[i]);
- }*/
+ 
+     
+ 
 
-  for (int a=1; a<argc;) {
-    const char *fxn=argv[a];
+  
+ 
+
+  for (int a=1; a<argc;a++) {
 
  
-    //ambient; -kx r g b
-    if ((strcmp(fxn, "-ka") == 0)) {
-     //  printf ("%s \n", "reached first if");
-    //update rgb values for ambience
-                   printf ("%s \n", fxn);
-
-        for (int color=0; color<3; color++){
-            for (int arg=2; arg<=4; arg++){
-            ka[color]=atof(argv[arg]);
-            arg++;
-        }
-        }
-         a+=4;
+        if (strcmp(argv[a], "-ka") == 0)
+        {
+            ka[0] = atof(argv[a+1]);
+            ka[1] = atof(argv[a+2]);
+            ka[2] = atof(argv[a+3]);
         }
 
-        else if ((strcmp(fxn, "-kd") == 0)) {
-        for (int color=0; color<3; color++){
-            for (int arg=2; arg<=4; arg++){
-            kd[color]=atof(argv[arg]);
-            arg++;
-        }
-        }
-         a+=4;
+ 
+ if (strcmp(argv[a], "-kd") == 0)
+        {
+            kd[0] = atof(argv[a+1]);
+            kd[1] = atof(argv[a+2]);
+            kd[2] = atof(argv[a+3]);
         }
 
-        else if ((strcmp(fxn, "-ks") == 0)) {
-                   printf ("%s \n", fxn);
+ 
 
-        for (int color=0; color<3; color++){
-            for (int arg=2; arg<=4; arg++){
-            ks[color]=atof(argv[arg]);
-            arg++;
-        }
-        }
-         a+=4;
+    if (strcmp(argv[a], "-ks") == 0)
+        {
+            ks[0] = atof(argv[a+1]);
+            ks[1] = atof(argv[a+2]);
+            ks[2] = atof(argv[a+3]);
         }
 
-  
         
-//• -dl x y z r g b    -- x y z r g b values stored in a 2 dimensional array, accessed by pl_array[point light number][0-5, with 0 being x and b being 5]
     else if (strcmp(fxn, "-dl") == 0) {
      // for (int dl=0, dl<5;dl++) {
        // if plcount[dl]==false {
 
           for (int adddl=0; adddl<6; adddl++){
-       //   printf ("%s \n", argv[a+1+adddl]);
-       //   printf ("%d \n", dlcount);
-       //   printf ("%d \n", adddl);
-
-
           dl_array[dlcount][adddl]=atof(argv[a+1+adddl]);
         }
         dlcount++;
@@ -408,15 +476,17 @@ int i;
         plcount++;
         a+=7;
     }
+
  
-
-      else {
-                std::cerr << "--arg not recognized" << std::endl;
-
-      }
+       
   }
-
-
+    
+  //This initializes glut
+  glutInit(&argc, argv);
+  
+  //This tells glut to use a double-buffered window with red, green, and blue channels 
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+/*
     // testing functions here
     float test1[] = {3, 4, 2};
     float test2[] = {1, 2, 3};
@@ -429,7 +499,7 @@ int i;
     normalize(3, test1);
     for(int i = 0; i < 3; i++) {
         printf("%f, \n", test1[i]);
-    }
+    }*/
  
  
 

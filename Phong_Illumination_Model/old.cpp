@@ -151,27 +151,27 @@ void diffuse(Vec3* diffusePart, Vec3 I, Vec3 l, Vec3 n) {
     
 }
 
+ 
 
 
-
-// spec
+// spec  
 void spec(Vec3* spec, Vec3 I, Vec3 r, Vec3 v) {
     //    printf("dot %f\n", kd.y);
     float rDotv=dot(r,v);
-    spec->x += ks.x*I.x * pow(max(rDotv,0.0f),spec_coeff);
-    spec->y += ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
-    spec->z += ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
+       spec->x += ks.x*I.x * pow(max(rDotv,0.0f),spec_coeff);
+       spec->y += ks.y*I.y *pow(max(rDotv,0.0f),spec_coeff);
+       spec->z += ks.z*I.z * pow(max(rDotv,0.0f),spec_coeff);
 }
 
 /*
- // Specular
- void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v) {
- float rDotv = dot(r, v);
- float rDotvP = pow(rDotv, spec_coeff);
- specPart->x += fmax(ks.x * I.x * rDotvP, 0.0);
- specPart->y += fmax(ks.y * I.y * rDotvP, 0.0);
- specPart->z += fmax(ks.z * I.z * rDotvP, 0.0);
- }*/
+// Specular
+void specular(Vec3* specPart, Vec3 I, Vec3 r, Vec3 v) {
+    float rDotv = dot(r, v);
+    float rDotvP = pow(rDotv, spec_coeff);
+    specPart->x += fmax(ks.x * I.x * rDotvP, 0.0);
+    specPart->y += fmax(ks.y * I.y * rDotvP, 0.0);
+    specPart->z += fmax(ks.z * I.z * rDotvP, 0.0);
+}*/
 
 
 void circle(float centerX, float centerY, float radius) {
@@ -182,16 +182,16 @@ void circle(float centerX, float centerY, float radius) {
     // way.  In general drawing an object by loopig over the whole
     // screen is wasteful.
     Vec3 final_rgb_ambience ={0,0,0};
-    
+
     int i,j;  // Pixel indices
     int minI = max(0,(int)floor(centerX-radius));
     int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
     int minJ = max(0,(int)floor(centerY-radius));
     int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+
+ 
     
-    
-    
-    //add to ambient term
+//add to ambient term
     
     for (int i = 0; i < plcount; i ++)
     {
@@ -214,7 +214,7 @@ void circle(float centerX, float centerY, float radius) {
             float x = (i+0.5-centerX);
             float y = (j+0.5-centerY);
             float dist = sqrt(sqr(x) + sqr(y));
-            Vec3 dl_I;
+            Vec3 dl_I;   
             Vec3 dl_L;
             Vec3 dl_ref;
             Vec3 pl_I;
@@ -222,17 +222,14 @@ void circle(float centerX, float centerY, float radius) {
             Vec3 pl_ref;
             
             Vec3 final_rgb_diffuse = {0.0,0.0,0.0};
-            Vec3 final_rgb_specular = {0.0,0.0,0.0};
-            
+             Vec3 final_rgb_specular = {0.0,0.0,0.0};
+             
             if (dist<=radius) {
                 // This is the front-facing Z coordinate
                 float z = sqrt(radius*radius-dist*dist);
-                x = x/radius;
-                y = y/radius;
-                z = z/radius;
                 Vec3 n = {x,y,z};
                 normalize(&n);  //normalizes vector
-                
+
                 
                 for (int m = 0; m<dlcount; m++) {
                     //I = intensity r g b
@@ -240,14 +237,16 @@ void circle(float centerX, float centerY, float radius) {
                     dl_I.y =dl_array[m][4];
                     dl_I.z =dl_array[m][5];
                     //L = direction xyz
-                    dl_L.x= -dl_array[m][0];//direction
-                    dl_L.y= -dl_array[m][1];
-                    dl_L.z= -dl_array[m][2];
+                    dl_Lnorm.x= -dl_array[m][0];//direction
+                    dl_Lnorm.y= -dl_array[m][1];
+                    dl_Lnorm.z= -dl_array[m][2];
                     
-                    
+                    dl_L.x= dl_array[m][0];//direction
+                    dl_L.y= dl_array[m][1];
+                    dl_L.z= dl_array[m][2];
                     normalize(&dl_L);
                     float dldotn=dot(dl_L, n);
-                    
+
                     float refx = -dl_L.x + 2*(dldotn)*n.x;
                     float refy = -dl_L.y + 2*(dldotn)*n.y;
                     float refz = -dl_L.z + 2*(dldotn)*n.z;
@@ -257,24 +256,24 @@ void circle(float centerX, float centerY, float radius) {
                     //diffuse reflection
                     diffuse(&final_rgb_diffuse, dl_I, dl_L, n);
                     spec(&final_rgb_specular, dl_I,dl_ref,view);
-                    
+
                 }
-                
+
                 for (int m = 0; m<plcount; m++) {
-                    
+
                     //L = direction xyz
-                    pl_L.x= pl_array[m][0]-x;
-                    //     printf ("%s %f \n", "r in I ", pl_L.x);
-                    
-                    pl_L.y= pl_array[m][1]-y;
-                    pl_L.z= pl_array[m][2]-z;
+                    pl_L.x= pl_array[m][0]*radius-x;
+               //     printf ("%s %f \n", "r in I ", pl_L.x);
+
+                    pl_L.y= pl_array[m][1]*radius-y;
+                    pl_L.z= pl_array[m][2]*radius-z;
                     //I = intensity r g b
                     pl_I.x =pl_array[m][3];
                     pl_I.y =pl_array[m][4];
                     pl_I.z =pl_array[m][5];
                     
                     normalize(&pl_L);
-                    
+
                     //r=d-2(d*nnorm)norm
                     float pldotn=dot(pl_L, n);
                     float refx = -pl_L.x + 2*(pldotn)*n.x;
@@ -286,10 +285,10 @@ void circle(float centerX, float centerY, float radius) {
                     spec(&final_rgb_specular, pl_I,pl_ref,view);
                     diffuse(&final_rgb_diffuse, pl_I,pl_L,n);
                 }
-                
-                //  setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
+            
+          //  setPixel(i,j, final_rgb_specular.x+final_rgb_ambience.x+final_rgb_diffuse.x, final_rgb_specular.y+final_rgb_ambience.y+final_rgb_diffuse.y, final_rgb_specular.z+final_rgb_ambience.z+final_rgb_diffuse.z);
                 setPixel(i,j, final_rgb_diffuse.x +final_rgb_specular.x+final_rgb_ambience.x, final_rgb_diffuse.y +final_rgb_specular.y+final_rgb_ambience.y, final_rgb_diffuse.z  +final_rgb_ambience.z);
-                
+
             }
             
             
@@ -328,62 +327,62 @@ void myDisplay() {
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
+ 
 
 
-
-
-
-int main(int argc, char *argv[]) {
     
-    for (int i = 1; i < argc; i ++)
-    {
-        if (strcmp(argv[i], "-ka") == 0)
-        {
-            ka.x = atof(argv[i+1]);
-            ka.y = atof(argv[i+2]);
-            ka.z = atof(argv[i+3]);
-        }
+ 
+    int main(int argc, char *argv[]) {
         
-        else if (strcmp(argv[i], "-kd") == 0)
+        for (int i = 1; i < argc; i ++)
         {
-            kd.x = atof(argv[i+1]);
-            kd.y = atof(argv[i+2]);
-            kd.z = atof(argv[i+3]);
-        }
-        
-        else if (strcmp(argv[i], "-ks") == 0)
-        {
-            ks.x = atof(argv[i+1]);
-            ks.y = atof(argv[i+2]);
-            ks.z = atof(argv[i+3]);
-        }
-        
-        else if (strcmp(argv[i], "-dl") == 0)
-        {
-            for(int m = 0; m < 6; m++)
+            if (strcmp(argv[i], "-ka") == 0)
             {
-                dl_array[dlcount][m] = atof(argv[i + 1 + m]);
+                ka.x = atof(argv[i+1]);
+                ka.y = atof(argv[i+2]);
+                ka.z = atof(argv[i+3]);
             }
-            dlcount++;
             
-        }
-        else if (strcmp(argv[i], "-sp") == 0)
-        {
-            spec_coeff = atof(argv[i+1]);
-            
-        }
-        
-        else if (strcmp(argv[i], "-pl") == 0)
-        {
-            for(int m= 0; m < 6; m++)
+            else if (strcmp(argv[i], "-kd") == 0)
             {
-                pl_array[plcount][m] = atof(argv[i + 1 + m]);
+                kd.x = atof(argv[i+1]);
+                kd.y = atof(argv[i+2]);
+                kd.z = atof(argv[i+3]);
             }
-            plcount++;
+            
+            else if (strcmp(argv[i], "-ks") == 0)
+            {
+                ks.x = atof(argv[i+1]);
+                ks.y = atof(argv[i+2]);
+                ks.z = atof(argv[i+3]);
+            }
+            
+            else if (strcmp(argv[i], "-dl") == 0)
+            {
+                for(int m = 0; m < 6; m++)
+                {
+                    dl_array[dlcount][m] = atof(argv[i + 1 + m]);
+                }
+                dlcount++;
+                
+            }
+            else if (strcmp(argv[i], "-sp") == 0)
+            {
+                spec_coeff = atof(argv[i+1]);
+
+            }
+            
+            else if (strcmp(argv[i], "-pl") == 0)
+            {
+                for(int m= 0; m < 6; m++)
+                {
+                    pl_array[plcount][m] = atof(argv[i + 1 + m]);
+                }
+                plcount++;
+            }
+            
+          
         }
-        
-        
-    }
     //This initializes glut
     glutInit(&argc, argv);
     
@@ -414,14 +413,14 @@ int main(int argc, char *argv[]) {
     printf("%f, \n", test3.x);
     printf("%f, \n", test3.y);
     printf("%f, \n", test3.z);
-    
-    
+ 
+     
     
     // Initalize theviewport size
     viewport.w = 400;
     viewport.h = 400;
     
-    
+
     //The size and position of the window
     glutInitWindowSize(viewport.w, viewport.h);
     glutInitWindowPosition(0,0);
@@ -431,11 +430,17 @@ int main(int argc, char *argv[]) {
     
     glutDisplayFunc(myDisplay);               // function to run when its time to draw something
     glutReshapeFunc(myReshape);               // function to run when the window gets resized
-    
-    //exit on spacebar
-    glutKeyboardFunc(handleSpacebar);
+        
+        //exit on spacebar
+        glutKeyboardFunc(handleSpacebar);
     glutMainLoop();                           // infinite loop that will keep drawing and resizing
     // and whatever else
-    
+
     return 0;
 }
+
+    
+    
+    
+    
+    
